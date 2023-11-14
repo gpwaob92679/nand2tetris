@@ -10,3 +10,42 @@
 // R0 >= 0, R1 >= 0, and R0*R1 < 32768.
 
 // Put your code here.
+
+// High-level code:
+// R2 = 0;
+// while (R1 > 0) {
+//   R2 += R0;
+//   --R1;
+// }
+
+// Pseudocode:
+// R2 = 0;
+// LOOP:
+//   if (R1 <= 0) goto END;
+//   R2 = R2 + R0;
+//   R1 = R1 - 1;
+//   goto LOOP;
+// END:
+//   goto END;
+
+  @R2
+  M=0
+(LOOP)
+  @R1
+  D=M
+  @END
+  D;JLE
+
+  @R0
+  D=M
+  @R2
+  M=M+D
+
+  @R1
+  M=M-1
+
+  @LOOP
+  0;JMP
+(END)
+  @END
+  0;JMP
