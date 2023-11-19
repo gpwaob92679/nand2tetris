@@ -41,6 +41,7 @@ class CInstruction : public Instruction {
     return absl::StrFormat("111%s%s%s", computation_.to_string(),
                            destination_.to_string(), jump_.to_string());
   }
+
   std::string ToAssembly() const override {
     std::string assembly;
     if (destination_.any()) {
@@ -56,7 +57,7 @@ class CInstruction : public Instruction {
       assembly.push_back('=');
     }
 
-    for (const auto &pair : kComputationMachine) {
+    for (const auto &pair : kComputationCodes) {
       if (pair.second == computation_) {
         absl::StrAppend(&assembly, pair.first);
         break;
@@ -65,13 +66,13 @@ class CInstruction : public Instruction {
 
     if (jump_.any()) {
       assembly.push_back(';');
-      absl::StrAppend(&assembly, kJumpMachine[jump_.to_ulong()]);
+      absl::StrAppend(&assembly, kJumpCodes[jump_.to_ulong()]);
     }
     return assembly;
   }
 
   bool SetComputation(std::string_view computation_str) {
-    for (const auto &pair : kComputationMachine) {
+    for (const auto &pair : kComputationCodes) {
       if (pair.first == computation_str) {
         computation_ = pair.second;
         return true;
@@ -79,6 +80,7 @@ class CInstruction : public Instruction {
     }
     return false;
   }
+
   bool SetDestination(std::string_view destination_str) {
     for (char c : destination_str) {
       switch (c) {
@@ -98,9 +100,9 @@ class CInstruction : public Instruction {
     }
     return true;
   }
+
   bool SetJump(std::string_view jump_str) {
-    size_t found =
-        std::find(kJumpMachine, kJumpMachine + 8, jump_str) - kJumpMachine;
+    size_t found = std::find(kJumpCodes, kJumpCodes + 8, jump_str) - kJumpCodes;
     if (found == 8) {
       return false;
     }
@@ -110,7 +112,7 @@ class CInstruction : public Instruction {
 
  private:
   static constexpr std::pair<std::string_view, std::bitset<7>>
-      kComputationMachine[] = {
+      kComputationCodes[] = {
           {"0", 0b0101010},   {"1", 0b0111111},   {"-1", 0b0111010},
           {"D", 0b0001100},   {"A", 0b0110000},   {"!D", 0b0001101},
           {"!A", 0b0110001},  {"-D", 0b0001111},  {"-A", 0b0110011},
@@ -121,7 +123,7 @@ class CInstruction : public Instruction {
           {"M+1", 0b1110111}, {"M-1", 0b1110010}, {"D+M", 0b1000010},
           {"D-M", 0b1010011}, {"M-D", 0b1000111}, {"D&M", 0b1000000},
           {"D|M", 0b1010101}};
-  static constexpr std::string_view kJumpMachine[8] = {
+  static constexpr std::string_view kJumpCodes[8] = {
       "", "JGT", "JEQ", "JGE", "JLT", "JNE", "JLE", "JMP"};
 
   std::bitset<7> computation_;
@@ -163,7 +165,6 @@ int main(int argc, char *argv[]) {
       line.push_back(buffer[i]);
     }
     if (!line.empty()) {
-      // LOG(INFO) << line;
       trimmed_lines.push_back(std::move(line));
     }
   }
@@ -185,12 +186,12 @@ int main(int argc, char *argv[]) {
   }
 
   std::vector<std::unique_ptr<Instruction>> instructions;
-  uint16_t next_address = 16;
+  uint16_t variable_address = 16;
   for (const std::string &line : trimmed_lines) {
     if (line.front() == '(' && line.back() == ')') {  // Label
       continue;
     }
-    if (line.front() == '@') {  // A instruction
+    if (line.front() == '@') {  // A-instruction
       std::string value_str = line.substr(1);
       if (IsNumber(value_str)) {
         uint32_t value;
@@ -202,12 +203,12 @@ int main(int argc, char *argv[]) {
         }
       } else {
         if (!symbol_table.count(value_str)) {
-          symbol_table[value_str] = next_address++;
+          symbol_table[value_str] = variable_address++;
         }
         instructions.push_back(
             std::make_unique<AInstruction>(symbol_table[value_str]));
       }
-    } else {  // C instruction
+    } else {  // C-instruction
       auto instruction = std::make_unique<CInstruction>();
       std::string_view line_view(line);
       size_t found = line_view.find('=');
