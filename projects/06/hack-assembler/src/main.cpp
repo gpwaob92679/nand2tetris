@@ -1,5 +1,6 @@
 #include <algorithm>
 #include <bitset>
+#include <filesystem>
 #include <fstream>
 #include <iostream>
 #include <memory>
@@ -8,6 +9,7 @@
 #include <utility>
 #include <vector>
 
+#include "absl/log/check.h"
 #include "absl/log/log.h"
 #include "absl/strings/numbers.h"
 #include "absl/strings/str_cat.h"
@@ -141,15 +143,9 @@ bool IsNumber(std::string_view str) {
 }
 
 int main(int argc, char *argv[]) {
-  if (argc < 2) {
-    LOG(FATAL) << "Invalid arguments";
-    return 1;
-  }
+  CHECK_GE(argc, 2) << "No input file";
   std::ifstream asm_file(argv[1]);
-  if (!asm_file.is_open()) {
-    LOG(FATAL) << "Could not open input file" << argv[1];
-    return 1;
-  }
+  CHECK(asm_file.is_open()) << "Failed to open input file '" << argv[1] << "'";
 
   std::string buffer;
   std::vector<std::string> trimmed_lines;
@@ -185,7 +181,12 @@ int main(int argc, char *argv[]) {
     }
   }
 
-  std::vector<std::unique_ptr<Instruction>> instructions;
+  std::string hack_filename = std::filesystem::path(argv[1]).stem().string();
+  absl::StrAppend(&hack_filename, ".hack");
+  std::ofstream hack_file(hack_filename);
+  CHECK(hack_file.is_open())
+      << "Failed to open output file '" << hack_filename << "'";
+
   uint16_t variable_address = 16;
   for (const std::string &line : trimmed_lines) {
     if (line.front() == '(' && line.back() == ')') {  // Label
@@ -196,8 +197,8 @@ int main(int argc, char *argv[]) {
       if (IsNumber(value_str)) {
         uint32_t value;
         if (absl::SimpleAtoi(value_str, &value) && value <= UINT16_MAX) {
-          instructions.push_back(
-              std::make_unique<AInstruction>(static_cast<uint16_t>(value)));
+          hack_file << AInstruction(static_cast<uint16_t>(value)).ToMachine()
+                    << std::endl;
         } else {
           LOG(ERROR) << "Cannot convert " << value_str << " to uint16_t";
         }
@@ -205,37 +206,26 @@ int main(int argc, char *argv[]) {
         if (!symbol_table.count(value_str)) {
           symbol_table[value_str] = variable_address++;
         }
-        instructions.push_back(
-            std::make_unique<AInstruction>(symbol_table[value_str]));
+        hack_file << AInstruction(symbol_table[value_str]).ToMachine()
+                  << std::endl;
       }
     } else {  // C-instruction
-      auto instruction = std::make_unique<CInstruction>();
+      CInstruction instruction;
       std::string_view line_view(line);
       size_t found = line_view.find('=');
       if (found != std::string_view::npos) {
-        instruction->SetDestination(line_view.substr(0, found));
+        instruction.SetDestination(line_view.substr(0, found));
         line_view.remove_prefix(found + 1);
       }
 
       found = line_view.find(';');
-      instruction->SetComputation(line_view.substr(0, found));
+      instruction.SetComputation(line_view.substr(0, found));
       if (found != std::string_view::npos) {
         line_view.remove_prefix(found + 1);
-        instruction->SetJump(line_view);
+        instruction.SetJump(line_view);
       }
-      instructions.push_back(std::move(instruction));
+      hack_file << instruction.ToMachine() << std::endl;
     }
-  }
-
-  std::ofstream hack_file(absl::StrFormat("%s.hack", argv[1]));
-  if (!hack_file.is_open()) {
-    LOG(FATAL) << "Could not open output file"
-               << absl::StrFormat("%s.hack", argv[1]);
-  }
-  for (std::unique_ptr<Instruction> &instruction : instructions) {
-    LOG(INFO) << instruction->ToAssembly() << " -> "
-              << instruction->ToMachine();
-    hack_file << instruction->ToMachine() << std::endl;
   }
   hack_file.close();
   return 0;

@@ -16,4 +16,4 @@ set(ABSL_PROPAGATE_CXX_STD ON)
 FetchContent_MakeAvailable(absl)
 
 add_executable(assembler src/main.cpp)
-target_link_libraries(assembler absl::log absl::strings)
+target_link_libraries(assembler absl::check absl::log absl::strings)
