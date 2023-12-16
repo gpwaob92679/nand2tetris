@@ -9,11 +9,10 @@ if (POLICY CMP0135)
 endif (POLICY CMP0135)
 include(FetchContent)
 FetchContent_Declare(
-absl
-URL https://github.com/abseil/abseil-cpp/archive/refs/heads/master.zip
+  absl
+  URL https://github.com/abseil/abseil-cpp/archive/refs/heads/master.zip
 )
 set(ABSL_PROPAGATE_CXX_STD ON)
 FetchContent_MakeAvailable(absl)
 
-add_executable(assembler 06/assembler/main.cpp)
-target_link_libraries(assembler absl::check absl::log absl::strings)
+add_subdirectory(06/assembler)
