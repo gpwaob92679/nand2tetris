@@ -2,6 +2,7 @@
 #define NAND2TETRIS_VMTRANSLATOR_COMMANDS_H_
 
 #include <iostream>
+#include <string>
 #include <string_view>
 
 #include "absl/strings/str_format.h"
@@ -67,5 +68,53 @@ struct Not {
   static constexpr std::string_view command = "M=!M";
 };
 using NotCommand = UnaryArithmeticCommand<Not>;
+
+template <class Op>
+class BinaryComparisonCommand : public Command {
+ public:
+  BinaryComparisonCommand(std::string_view else_label,
+                          std::string_view end_label)
+      : else_label_(else_label), end_label_(end_label) {}
+
+  std::string ToString() const {
+    return absl::StrFormat(
+        "@SP\n"
+        "AM=M-1\n"
+        "D=M\n"
+        "A=A-1\n"
+        "D=M-D\n"
+        "@%s\n"
+        "D;%s\n"
+        "@SP\n"
+        "A=M-1\n"
+        "M=-1\n"
+        "@%s\n"
+        "0;JMP\n"
+        "(%s)\n"
+        "@SP\n"
+        "A=M-1\n"
+        "M=0\n"
+        "(%s)\n",
+        else_label_, Op::jump_condition, end_label_, else_label_, end_label_);
+  }
+
+ private:
+  std::string else_label_, end_label_;
+};
+
+struct Eq {
+  static constexpr std::string_view jump_condition = "JNE";
+};
+using EqCommand = BinaryComparisonCommand<Eq>;
+
+struct Gt {
+  static constexpr std::string_view jump_condition = "JLE";
+};
+using GtCommand = BinaryComparisonCommand<Gt>;
+
+struct Lt {
+  static constexpr std::string_view jump_condition = "JGE";
+};
+using LtCommand = BinaryComparisonCommand<Lt>;
 
 #endif  // NAND2TETRIS_VMTRANSLATOR_COMMANDS_H_
