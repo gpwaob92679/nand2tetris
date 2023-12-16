@@ -1,0 +1,11 @@
+add_executable(
+  commands_test
+  commands_test.cpp
+  commands.cpp
+)
+target_link_libraries(
+  commands_test
+  GTest::gtest_main
+  absl::str_format
+)
+gtest_discover_tests(commands_test)
