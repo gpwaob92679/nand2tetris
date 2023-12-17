@@ -9,14 +9,14 @@
 
 class Command {
  public:
-  virtual std::string ToString() const = 0;
+  virtual std::string ToAssembly() const = 0;
 };
 std::ostream &operator<<(std::ostream &os, const Command &command);
 
 template <class Op>
 class BinaryArithmeticCommand : public Command {
  public:
-  std::string ToString() const override {
+  std::string ToAssembly() const override {
     return absl::StrFormat(
         "@SP\n"
         "AM=M-1\n"
@@ -50,7 +50,7 @@ using OrCommand = BinaryArithmeticCommand<Or>;
 template <class Op>
 class UnaryArithmeticCommand : public Command {
  public:
-  std::string ToString() const {
+  std::string ToAssembly() const {
     return absl::StrFormat(
         "@SP\n"
         "A=M-1\n"
@@ -76,7 +76,7 @@ class BinaryComparisonCommand : public Command {
                           std::string_view end_label)
       : else_label_(else_label), end_label_(end_label) {}
 
-  std::string ToString() const {
+  std::string ToAssembly() const {
     return absl::StrFormat(
         "@SP\n"
         "AM=M-1\n"

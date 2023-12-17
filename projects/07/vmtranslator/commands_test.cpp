@@ -3,7 +3,7 @@
 #include "gtest/gtest.h"
 
 TEST(CommandsTest, AddCommand) {
-  EXPECT_EQ(AddCommand().ToString(),
+  EXPECT_EQ(AddCommand().ToAssembly(),
             "@SP\n"
             "AM=M-1\n"
             "D=M\n"
@@ -12,7 +12,7 @@ TEST(CommandsTest, AddCommand) {
 }
 
 TEST(CommandsTest, SubCommand) {
-  EXPECT_EQ(SubCommand().ToString(),
+  EXPECT_EQ(SubCommand().ToAssembly(),
             "@SP\n"
             "AM=M-1\n"
             "D=M\n"
@@ -21,7 +21,7 @@ TEST(CommandsTest, SubCommand) {
 }
 
 TEST(CommandsTest, AndCommand) {
-  EXPECT_EQ(AndCommand().ToString(),
+  EXPECT_EQ(AndCommand().ToAssembly(),
             "@SP\n"
             "AM=M-1\n"
             "D=M\n"
@@ -30,7 +30,7 @@ TEST(CommandsTest, AndCommand) {
 }
 
 TEST(CommandsTest, OrCommand) {
-  EXPECT_EQ(OrCommand().ToString(),
+  EXPECT_EQ(OrCommand().ToAssembly(),
             "@SP\n"
             "AM=M-1\n"
             "D=M\n"
@@ -39,21 +39,21 @@ TEST(CommandsTest, OrCommand) {
 }
 
 TEST(CommandsTest, NegCommand) {
-  EXPECT_EQ(NegCommand().ToString(),
+  EXPECT_EQ(NegCommand().ToAssembly(),
             "@SP\n"
             "A=M-1\n"
             "M=-M\n");
 }
 
 TEST(CommandsTest, NotCommand) {
-  EXPECT_EQ(NotCommand().ToString(),
+  EXPECT_EQ(NotCommand().ToAssembly(),
             "@SP\n"
             "A=M-1\n"
             "M=!M\n");
 }
 
 TEST(CommandsTest, EqCommand) {
-  EXPECT_EQ(EqCommand("L1", "L2").ToString(),
+  EXPECT_EQ(EqCommand("L1", "L2").ToAssembly(),
             "@SP\n"
             "AM=M-1\n"
             "D=M\n"
@@ -74,7 +74,7 @@ TEST(CommandsTest, EqCommand) {
 }
 
 TEST(CommandsTest, GtCommand) {
-  EXPECT_EQ(GtCommand("L1", "L2").ToString(),
+  EXPECT_EQ(GtCommand("L1", "L2").ToAssembly(),
             "@SP\n"
             "AM=M-1\n"
             "D=M\n"
@@ -95,7 +95,7 @@ TEST(CommandsTest, GtCommand) {
 }
 
 TEST(CommandsTest, LtCommand) {
-  EXPECT_EQ(LtCommand("L1", "L2").ToString(),
+  EXPECT_EQ(LtCommand("L1", "L2").ToAssembly(),
             "@SP\n"
             "AM=M-1\n"
             "D=M\n"
