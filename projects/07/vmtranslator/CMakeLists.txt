@@ -1,12 +1,32 @@
-add_executable(
-  addressing_test
-  addressing_test.cpp
+add_library(
+  addressing
   addressing.cpp
 )
 target_link_libraries(
-  addressing_test
+  addressing
   absl::log
   absl::str_format
+)
+
+add_library(
+  commands
+  commands.cpp
+)
+target_link_libraries(
+  commands
+  absl::str_format
+  addressing
+)
+
+# Tests
+
+add_executable(
+  addressing_test
+  addressing_test.cpp
+)
+target_link_libraries(
+  addressing_test
+  addressing
   GTest::gtest_main
 )
 gtest_discover_tests(addressing_test)
@@ -14,11 +34,10 @@ gtest_discover_tests(addressing_test)
 add_executable(
   commands_test
   commands_test.cpp
-  commands.cpp
 )
 target_link_libraries(
   commands_test
-  absl::str_format
+  commands
   GTest::gtest_main
 )
 gtest_discover_tests(commands_test)
