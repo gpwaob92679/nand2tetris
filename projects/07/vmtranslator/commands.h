@@ -99,4 +99,13 @@ class PushCommand : public Command {
   std::unique_ptr<Address> address_;
 };
 
+class PopCommand : public Command {
+ public:
+  PopCommand(std::unique_ptr<Address> address);
+  std::string ToAssembly() const override;
+
+ private:
+  std::unique_ptr<Address> address_;
+};
+
 #endif  // NAND2TETRIS_VMTRANSLATOR_COMMANDS_H_

@@ -218,3 +218,103 @@ TEST(PushCommandTest, TempAddress) {
             "@SP\n"
             "M=M+1\n");
 }
+
+TEST(PopCommandTest, ArgumentAddress) {
+  EXPECT_EQ(PopCommand(std::make_unique<ArgumentAddress>(5)).ToAssembly(),
+            "@5\n"
+            "D=A\n"
+            "@ARG\n"
+            "D=D+M\n"
+            "@R15\n"
+            "M=D\n"
+            "@SP\n"
+            "AM=M-1\n"
+            "D=M\n"
+            "@R15\n"
+            "A=M\n"
+            "M=D\n");
+}
+
+TEST(PopCommandTest, LocalAddress) {
+  EXPECT_EQ(PopCommand(std::make_unique<LocalAddress>(5)).ToAssembly(),
+            "@5\n"
+            "D=A\n"
+            "@LCL\n"
+            "D=D+M\n"
+            "@R15\n"
+            "M=D\n"
+            "@SP\n"
+            "AM=M-1\n"
+            "D=M\n"
+            "@R15\n"
+            "A=M\n"
+            "M=D\n");
+}
+
+TEST(PopCommandTest, ThisAddress) {
+  EXPECT_EQ(PopCommand(std::make_unique<ThisAddress>(5)).ToAssembly(),
+            "@5\n"
+            "D=A\n"
+            "@THIS\n"
+            "D=D+M\n"
+            "@R15\n"
+            "M=D\n"
+            "@SP\n"
+            "AM=M-1\n"
+            "D=M\n"
+            "@R15\n"
+            "A=M\n"
+            "M=D\n");
+}
+
+TEST(PopCommandTest, ThatAddress) {
+  EXPECT_EQ(PopCommand(std::make_unique<ThatAddress>(5)).ToAssembly(),
+            "@5\n"
+            "D=A\n"
+            "@THAT\n"
+            "D=D+M\n"
+            "@R15\n"
+            "M=D\n"
+            "@SP\n"
+            "AM=M-1\n"
+            "D=M\n"
+            "@R15\n"
+            "A=M\n"
+            "M=D\n");
+}
+
+TEST(PopCommandTest, StaticAddress) {
+  EXPECT_EQ(PopCommand(std::make_unique<StaticAddress>("Foo", 5)).ToAssembly(),
+            "@SP\n"
+            "AM=M-1\n"
+            "D=M\n"
+            "@Foo.5\n"
+            "M=D\n");
+}
+
+TEST(PopCommandTest, ConstantAddress) {
+  EXPECT_EQ(PopCommand(std::make_unique<ConstantAddress>(5)).ToAssembly(),
+            "@SP\n"
+            "AM=M-1\n"
+            "D=M\n"
+            "@5\n"
+            "M=D\n");
+}
+
+TEST(PopCommandTest, PointerAddress) {
+  EXPECT_EQ(PopCommand(std::make_unique<PointerAddress>(0)).ToAssembly(),
+            "@SP\n"
+            "AM=M-1\n"
+            "D=M\n"
+            "@3\n"
+            "M=D\n");
+}
+
+TEST(PopCommandTest, TempAddress) {
+  EXPECT_EQ(PopCommand(std::make_unique<TempAddress>(5)).ToAssembly(),
+            "@SP\n"
+            "AM=M-1\n"
+            "D=M\n"
+            "@10\n"
+            "M=D\n");
+}

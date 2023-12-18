@@ -100,3 +100,29 @@ std::string PushCommand::ToAssembly() const {
       address_->AddressingAssembly(Destination::kA),
       address_->value_register());
 }
+
+PopCommand::PopCommand(std::unique_ptr<Address> address)
+    : address_(std::move(address)) {}
+
+std::string PopCommand::ToAssembly() const {
+  if (dynamic_cast<PointerAddressedAddress *>(address_.get())) {
+    return absl::StrFormat(
+        "%s"
+        "@R15\n"
+        "M=D\n"
+        "@SP\n"
+        "AM=M-1\n"
+        "D=M\n"
+        "@R15\n"
+        "A=M\n"
+        "M=D\n",
+        address_->AddressingAssembly(Destination::kD));
+  }
+  return absl::StrFormat(
+      "@SP\n"
+      "AM=M-1\n"
+      "D=M\n"
+      "%s"
+      "M=D\n",
+      address_->AddressingAssembly(Destination::kA));
+}

@@ -26,6 +26,38 @@ VmFile::~VmFile() {
   delete command_;
 }
 
+std::unique_ptr<Address> ParseAddress(std::string_view filename,
+                                      std::string_view segment,
+                                      std::string_view index_str) {
+  uint16_t index = std::stoi(index_str.data());
+  if (segment == "argument") {
+    return std::make_unique<ArgumentAddress>(index);
+  }
+  if (segment == "local") {
+    return std::make_unique<LocalAddress>(index);
+  }
+  if (segment == "static") {
+    return std::make_unique<StaticAddress>(filename, index);
+  }
+  if (segment == "constant") {
+    return std::make_unique<ConstantAddress>(index);
+  }
+  if (segment == "this") {
+    return std::make_unique<ThisAddress>(index);
+  }
+  if (segment == "that") {
+    return std::make_unique<ThatAddress>(index);
+  }
+  if (segment == "pointer") {
+    return std::make_unique<PointerAddress>(index);
+  }
+  if (segment == "temp") {
+    return std::make_unique<TempAddress>(index);
+  }
+  LOG(ERROR) << "Invalid address: " << segment << ' ' << index;
+  return nullptr;
+}
+
 void VmFile::Advance() {
   if (command_) {
     delete command_;
@@ -66,29 +98,11 @@ void VmFile::Advance() {
   } else if (tokens[0] == "push") {
     QCHECK_EQ(tokens.size(), 3) << filename_ << ':' << line_number_
                                 << ": Invalid push command: " << line;
-    uint16_t index = std::stoi(tokens[2].data());
-    if (tokens[1] == "argument") {
-      command_ = new PushCommand(std::make_unique<ArgumentAddress>(index));
-    } else if (tokens[1] == "local") {
-      command_ = new PushCommand(std::make_unique<LocalAddress>(index));
-    } else if (tokens[1] == "static") {
-      command_ =
-          new PushCommand(std::make_unique<StaticAddress>(filename_, index));
-    } else if (tokens[1] == "constant") {
-      command_ = new PushCommand(std::make_unique<ConstantAddress>(index));
-    } else if (tokens[1] == "this") {
-      command_ = new PushCommand(std::make_unique<ThisAddress>(index));
-    } else if (tokens[1] == "that") {
-      command_ = new PushCommand(std::make_unique<ThatAddress>(index));
-    } else if (tokens[1] == "pointer") {
-      command_ = new PushCommand(std::make_unique<PointerAddress>(index));
-    } else if (tokens[1] == "temp") {
-      command_ = new PushCommand(std::make_unique<TempAddress>(index));
-    } else {
-      LOG(ERROR) << filename_ << ':' << line_number_
-                 << ": Unknown segment: " << tokens[1];
-    }
+    command_ = new PushCommand(ParseAddress(filename_, tokens[1], tokens[2]));
   } else if (tokens[0] == "pop") {
+    QCHECK_EQ(tokens.size(), 3) << filename_ << ':' << line_number_
+                                << ": Invalid pop command: " << line;
+    command_ = new PopCommand(ParseAddress(filename_, tokens[1], tokens[2]));
   } else {
     LOG(ERROR) << filename_ << ':' << line_number_
                << ": Unknown command: " << line;
