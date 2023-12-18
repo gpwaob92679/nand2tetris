@@ -16,68 +16,85 @@ TEST(DestinationTest, DestinationString) {
 }
 
 TEST(AddressingTest, ArgumentAddress) {
-  EXPECT_EQ(ArgumentAddress(2).AddressingAssembly(Destination::kA),
+  ArgumentAddress address(2);
+  EXPECT_EQ(address.AddressingAssembly(Destination::kA),
             "@2\n"
             "D=A\n"
             "@ARG\n"
             "A=D+M\n");
+  EXPECT_EQ(address.value_register(), 'M');
 }
 
 TEST(AddressingTest, LocalAddress) {
-  EXPECT_EQ(LocalAddress(2).AddressingAssembly(Destination::kA),
+  LocalAddress address(2);
+  EXPECT_EQ(address.AddressingAssembly(Destination::kA),
             "@2\n"
             "D=A\n"
             "@LCL\n"
             "A=D+M\n");
+  EXPECT_EQ(address.value_register(), 'M');
 }
 
 TEST(AddressingTest, ThisAddress) {
-  EXPECT_EQ(ThisAddress(2).AddressingAssembly(Destination::kA),
+  ThisAddress address(2);
+  EXPECT_EQ(address.AddressingAssembly(Destination::kA),
             "@2\n"
             "D=A\n"
             "@THIS\n"
             "A=D+M\n");
+  EXPECT_EQ(address.value_register(), 'M');
 }
 
 TEST(AddressingTest, ThatAddress) {
-  EXPECT_EQ(ThatAddress(2).AddressingAssembly(Destination::kA),
+  ThatAddress address(2);
+  EXPECT_EQ(address.AddressingAssembly(Destination::kA),
             "@2\n"
             "D=A\n"
             "@THAT\n"
             "A=D+M\n");
+  EXPECT_EQ(address.value_register(), 'M');
 }
 
 TEST(AddressingTest, StaticAddress) {
-  EXPECT_EQ(StaticAddress("Foo", 2).AddressingAssembly(Destination::kA),
+  StaticAddress address("Foo", 2);
+  EXPECT_EQ(address.AddressingAssembly(Destination::kA), "@Foo.2\n");
+  EXPECT_EQ(address.AddressingAssembly(Destination::kD),
             "@Foo.2\n"
-            "A=M\n");
+            "D=A\n");
+  EXPECT_EQ(address.value_register(), 'M');
 }
 
 TEST(AddressingTest, ConstantAddress) {
-  EXPECT_EQ(ConstantAddress(2).AddressingAssembly(Destination::kA), "@2\n");
-  EXPECT_EQ(ConstantAddress(2).AddressingAssembly(Destination::kD),
+  ConstantAddress address(2);
+  EXPECT_EQ(address.AddressingAssembly(Destination::kA), "@2\n");
+  EXPECT_EQ(address.AddressingAssembly(Destination::kD),
             "@2\n"
             "D=A\n");
+  EXPECT_EQ(address.value_register(), 'A');
 }
 
 TEST(AddressingTest, PointerAddress) {
   for (int i = 0; i < 2; ++i) {
-    EXPECT_EQ(PointerAddress(i).AddressingAssembly(Destination::kA),
+    PointerAddress address(i);
+    EXPECT_EQ(address.AddressingAssembly(Destination::kA),
               absl::StrFormat("@%d\n", 3 + i));
-    EXPECT_EQ(PointerAddress(i).AddressingAssembly(Destination::kD),
+    EXPECT_EQ(address.AddressingAssembly(Destination::kD),
               absl::StrFormat("@%d\n"
                               "D=A\n",
                               3 + i));
+    EXPECT_EQ(address.value_register(), 'M');
   }
 }
 
 TEST(AddressingTest, TempAddress) {
   for (int i = 0; i < 8; ++i) {
-    EXPECT_EQ(TempAddress(i).AddressingAssembly(Destination::kA),
+    TempAddress address(i);
+    EXPECT_EQ(address.AddressingAssembly(Destination::kA),
               absl::StrFormat("@%d\n", 5 + i));
-    EXPECT_EQ(TempAddress(i).AddressingAssembly(Destination::kD),
+    EXPECT_EQ(address.AddressingAssembly(Destination::kD),
               absl::StrFormat("@%d\n"
                               "D=A\n",
                               5 + i));
+    EXPECT_EQ(address.value_register(), 'M');
   }
 }

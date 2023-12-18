@@ -2,8 +2,11 @@
 #define NAND2TETRIS_VMTRANSLATOR_COMMANDS_H_
 
 #include <iostream>
+#include <memory>
 #include <string>
 #include <string_view>
+
+#include "addressing.h"
 
 class Command {
  public:
@@ -85,6 +88,15 @@ class GtCommand : public BinaryComparisonCommand {
 class LtCommand : public BinaryComparisonCommand {
  public:
   LtCommand(std::string_view label);
+};
+
+class PushCommand : public Command {
+ public:
+  PushCommand(std::unique_ptr<Address> address);
+  std::string ToAssembly() const override;
+
+ private:
+  std::unique_ptr<Address> address_;
 };
 
 #endif  // NAND2TETRIS_VMTRANSLATOR_COMMANDS_H_

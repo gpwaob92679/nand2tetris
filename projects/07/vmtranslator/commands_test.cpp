@@ -1,8 +1,12 @@
 #include "commands.h"
 
+#include <memory>
+
 #include "gtest/gtest.h"
 
-TEST(CommandsTest, AddCommand) {
+#include "addressing.h"
+
+TEST(ArithmeticsCommandTest, AddCommand) {
   EXPECT_EQ(AddCommand().ToAssembly(),
             "@SP\n"
             "AM=M-1\n"
@@ -11,7 +15,7 @@ TEST(CommandsTest, AddCommand) {
             "M=D+M\n");
 }
 
-TEST(CommandsTest, SubCommand) {
+TEST(ArithmeticsCommandTest, SubCommand) {
   EXPECT_EQ(SubCommand().ToAssembly(),
             "@SP\n"
             "AM=M-1\n"
@@ -20,7 +24,7 @@ TEST(CommandsTest, SubCommand) {
             "M=M-D\n");
 }
 
-TEST(CommandsTest, AndCommand) {
+TEST(ArithmeticsCommandTest, AndCommand) {
   EXPECT_EQ(AndCommand().ToAssembly(),
             "@SP\n"
             "AM=M-1\n"
@@ -29,7 +33,7 @@ TEST(CommandsTest, AndCommand) {
             "M=D&M\n");
 }
 
-TEST(CommandsTest, OrCommand) {
+TEST(ArithmeticsCommandTest, OrCommand) {
   EXPECT_EQ(OrCommand().ToAssembly(),
             "@SP\n"
             "AM=M-1\n"
@@ -38,21 +42,21 @@ TEST(CommandsTest, OrCommand) {
             "M=D|M\n");
 }
 
-TEST(CommandsTest, NegCommand) {
+TEST(ArithmeticsCommandTest, NegCommand) {
   EXPECT_EQ(NegCommand().ToAssembly(),
             "@SP\n"
             "A=M-1\n"
             "M=-M\n");
 }
 
-TEST(CommandsTest, NotCommand) {
+TEST(ArithmeticsCommandTest, NotCommand) {
   EXPECT_EQ(NotCommand().ToAssembly(),
             "@SP\n"
             "A=M-1\n"
             "M=!M\n");
 }
 
-TEST(CommandsTest, EqCommand) {
+TEST(LogicalCommandTest, EqCommand) {
   EXPECT_EQ(EqCommand("Foo_123").ToAssembly(),
             "@SP\n"
             "AM=M-1\n"
@@ -73,7 +77,7 @@ TEST(CommandsTest, EqCommand) {
             "(Foo_123$eq_end)\n");
 }
 
-TEST(CommandsTest, GtCommand) {
+TEST(LogicalCommandTest, GtCommand) {
   EXPECT_EQ(GtCommand("Foo_123").ToAssembly(),
             "@SP\n"
             "AM=M-1\n"
@@ -94,7 +98,7 @@ TEST(CommandsTest, GtCommand) {
             "(Foo_123$gt_end)\n");
 }
 
-TEST(CommandsTest, LtCommand) {
+TEST(LogicalCommandTest, LtCommand) {
   EXPECT_EQ(LtCommand("Foo_123").ToAssembly(),
             "@SP\n"
             "AM=M-1\n"
@@ -113,4 +117,104 @@ TEST(CommandsTest, LtCommand) {
             "A=M-1\n"
             "M=0\n"
             "(Foo_123$lt_end)\n");
+}
+
+TEST(PushCommandTest, ArgumentAddress) {
+  EXPECT_EQ(PushCommand(std::make_unique<ArgumentAddress>(5)).ToAssembly(),
+            "@5\n"
+            "D=A\n"
+            "@ARG\n"
+            "A=D+M\n"
+            "D=M\n"
+            "@SP\n"
+            "A=M\n"
+            "M=D\n"
+            "@SP\n"
+            "M=M+1\n");
+}
+
+TEST(PushCommandTest, LocalAddress) {
+  EXPECT_EQ(PushCommand(std::make_unique<LocalAddress>(5)).ToAssembly(),
+            "@5\n"
+            "D=A\n"
+            "@LCL\n"
+            "A=D+M\n"
+            "D=M\n"
+            "@SP\n"
+            "A=M\n"
+            "M=D\n"
+            "@SP\n"
+            "M=M+1\n");
+}
+
+TEST(PushCommandTest, ThisAddress) {
+  EXPECT_EQ(PushCommand(std::make_unique<ThisAddress>(5)).ToAssembly(),
+            "@5\n"
+            "D=A\n"
+            "@THIS\n"
+            "A=D+M\n"
+            "D=M\n"
+            "@SP\n"
+            "A=M\n"
+            "M=D\n"
+            "@SP\n"
+            "M=M+1\n");
+}
+
+TEST(PushCommandTest, ThatAddress) {
+  EXPECT_EQ(PushCommand(std::make_unique<ThatAddress>(5)).ToAssembly(),
+            "@5\n"
+            "D=A\n"
+            "@THAT\n"
+            "A=D+M\n"
+            "D=M\n"
+            "@SP\n"
+            "A=M\n"
+            "M=D\n"
+            "@SP\n"
+            "M=M+1\n");
+}
+
+TEST(PushCommandTest, StaticAddress) {
+  EXPECT_EQ(PushCommand(std::make_unique<StaticAddress>("Foo", 5)).ToAssembly(),
+            "@Foo.5\n"
+            "D=M\n"
+            "@SP\n"
+            "A=M\n"
+            "M=D\n"
+            "@SP\n"
+            "M=M+1\n");
+}
+
+TEST(PushCommandTest, ConstantAddress) {
+  EXPECT_EQ(PushCommand(std::make_unique<ConstantAddress>(5)).ToAssembly(),
+            "@5\n"
+            "D=A\n"
+            "@SP\n"
+            "A=M\n"
+            "M=D\n"
+            "@SP\n"
+            "M=M+1\n");
+}
+
+TEST(PushCommandTest, PointerAddress) {
+  EXPECT_EQ(PushCommand(std::make_unique<PointerAddress>(0)).ToAssembly(),
+            "@3\n"
+            "D=M\n"
+            "@SP\n"
+            "A=M\n"
+            "M=D\n"
+            "@SP\n"
+            "M=M+1\n");
+}
+
+TEST(PushCommandTest, TempAddress) {
+  EXPECT_EQ(PushCommand(std::make_unique<TempAddress>(5)).ToAssembly(),
+            "@10\n"
+            "D=M\n"
+            "@SP\n"
+            "A=M\n"
+            "M=D\n"
+            "@SP\n"
+            "M=M+1\n");
 }

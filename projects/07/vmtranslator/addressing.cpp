@@ -20,9 +20,13 @@ std::string DestinationString(uint16_t destination) {
   return result;
 };
 
+Address::Address(char value_register) : value_register_(value_register) {}
+
+char Address::value_register() const { return value_register_; }
+
 PointerAddressedAddress::PointerAddressedAddress(std::string_view pointer,
                                                  uint16_t index)
-    : pointer_(pointer), index_(index) {}
+    : Address('M'), pointer_(pointer), index_(index) {}
 
 std::string PointerAddressedAddress::AddressingAssembly(
     uint16_t destination) const {
@@ -44,19 +48,10 @@ ThatAddress::ThatAddress(uint16_t index)
     : PointerAddressedAddress("THAT", index) {}
 
 StaticAddress::StaticAddress(std::string_view class_name, uint16_t index)
-    : class_name_(class_name), index_(index) {}
+    : Address('M'), class_name_(class_name), index_(index) {}
 
 std::string StaticAddress::AddressingAssembly(uint16_t destination) const {
-  return absl::StrFormat(
-      "@%s.%u\n"
-      "%s=M\n",
-      class_name_, index_, DestinationString(destination));
-}
-
-ConstantAddress::ConstantAddress(uint16_t index) : index_(index) {}
-
-std::string ConstantAddress::AddressingAssembly(uint16_t destination) const {
-  std::string result = absl::StrFormat("@%u\n", index_);
+  std::string result = absl::StrFormat("@%s.%u\n", class_name_, index_);
   destination = destination & ~Destination::kA;
   if (destination) {
     absl::StrAppendFormat(&result, "%s=A\n", DestinationString(destination));
@@ -64,14 +59,33 @@ std::string ConstantAddress::AddressingAssembly(uint16_t destination) const {
   return result;
 }
 
-PointerAddress::PointerAddress(uint16_t index) : ConstantAddress(3 + index) {
+DirectlyAddressedAddress::DirectlyAddressedAddress(uint16_t address,
+                                                   char value_register)
+    : Address(value_register), address_(address) {}
+
+std::string DirectlyAddressedAddress::AddressingAssembly(
+    uint16_t destination) const {
+  std::string result = absl::StrFormat("@%u\n", address_);
+  destination = destination & ~Destination::kA;
+  if (destination) {
+    absl::StrAppendFormat(&result, "%s=A\n", DestinationString(destination));
+  }
+  return result;
+}
+
+ConstantAddress::ConstantAddress(uint16_t index)
+    : DirectlyAddressedAddress(index, 'A') {}
+
+PointerAddress::PointerAddress(uint16_t index)
+    : DirectlyAddressedAddress(3 + index, 'M') {
   if (index >= 2) {
     LOG(WARNING) << "Index out of range: " << index
                  << " (pointer segment is 2 words long)";
   }
 }
 
-TempAddress::TempAddress(uint16_t index) : ConstantAddress(5 + index) {
+TempAddress::TempAddress(uint16_t index)
+    : DirectlyAddressedAddress(5 + index, 'M') {
   if (index >= 8) {
     LOG(WARNING) << "Index out of range: " << index
                  << " (temp segment is 8 words long)";

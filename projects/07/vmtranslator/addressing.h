@@ -14,7 +14,17 @@ std::string DestinationString(uint16_t destination);
 
 class Address {
  public:
+  Address(char value_register);
+
+  // Assembly code that stores the address of the value to be accessed in
+  // registers specified by `destination`.
   virtual std::string AddressingAssembly(uint16_t destination) const = 0;
+
+  // The register where the value to be accessed is stored.
+  char value_register() const;
+
+ private:
+  char value_register_;
 };
 
 class PointerAddressedAddress : public Address {
@@ -57,21 +67,26 @@ class StaticAddress : public Address {
   uint16_t index_;
 };
 
-class ConstantAddress : public Address {
+class DirectlyAddressedAddress : public Address {
  public:
-  ConstantAddress(uint16_t index);
+  DirectlyAddressedAddress(uint16_t address, char value_register);
   std::string AddressingAssembly(uint16_t destination) const override;
 
  private:
-  uint16_t index_;
+  uint16_t address_;
 };
 
-class PointerAddress : public ConstantAddress {
+class ConstantAddress : public DirectlyAddressedAddress {
+ public:
+  ConstantAddress(uint16_t index);
+};
+
+class PointerAddress : public DirectlyAddressedAddress {
  public:
   PointerAddress(uint16_t index);
 };
 
-class TempAddress : public ConstantAddress {
+class TempAddress : public DirectlyAddressedAddress {
  public:
   TempAddress(uint16_t index);
 };

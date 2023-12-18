@@ -1,11 +1,14 @@
 #include "commands.h"
 
 #include <iostream>
+#include <memory>
 #include <string>
 #include <string_view>
 
 #include "absl/strings/str_cat.h"
 #include "absl/strings/str_format.h"
+
+#include "addressing.h"
 
 std::ostream &operator<<(std::ostream &os, const Command &command) {
   return os << command.ToAssembly();
@@ -81,3 +84,19 @@ GtCommand::GtCommand(std::string_view label)
 LtCommand::LtCommand(std::string_view label)
     : BinaryComparisonCommand("JGE", absl::StrCat(label, "$lt_else"),
                               absl::StrCat(label, "$lt_end")) {}
+
+PushCommand::PushCommand(std::unique_ptr<Address> address)
+    : address_(std::move(address)) {}
+
+std::string PushCommand::ToAssembly() const {
+  return absl::StrFormat(
+      "%s"
+      "D=%c\n"
+      "@SP\n"
+      "A=M\n"
+      "M=D\n"
+      "@SP\n"
+      "M=M+1\n",
+      address_->AddressingAssembly(Destination::kA),
+      address_->value_register());
+}
