@@ -19,6 +19,34 @@ target_link_libraries(
   addressing
 )
 
+add_library(
+  parser
+  parser.cpp
+)
+target_link_libraries(
+  parser
+  absl::check
+  absl::log
+  absl::strings
+  absl::str_format
+  addressing
+  commands
+)
+
+add_executable(
+  vmtranslator
+  main.cpp
+)
+
+target_link_libraries(
+  vmtranslator
+  absl::check
+  absl::log
+  absl::strings
+  commands
+  parser
+)
+
 # Tests
 
 add_executable(
