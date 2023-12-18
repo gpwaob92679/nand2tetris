@@ -61,7 +61,7 @@ TEST(AddressingTest, ConstantAddress) {
 }
 
 TEST(AddressingTest, PointerAddress) {
-  for (int i = 0; i <= 2; ++i) {
+  for (int i = 0; i < 2; ++i) {
     EXPECT_EQ(PointerAddress(i).AddressingAssembly(Destination::kA),
               absl::StrFormat("@%d\n", 3 + i));
     EXPECT_EQ(PointerAddress(i).AddressingAssembly(Destination::kD),
@@ -72,7 +72,7 @@ TEST(AddressingTest, PointerAddress) {
 }
 
 TEST(AddressingTest, TempAddress) {
-  for (int i = 5; i <= 12; ++i) {
+  for (int i = 0; i < 8; ++i) {
     EXPECT_EQ(TempAddress(i).AddressingAssembly(Destination::kA),
               absl::StrFormat("@%d\n", 5 + i));
     EXPECT_EQ(TempAddress(i).AddressingAssembly(Destination::kD),

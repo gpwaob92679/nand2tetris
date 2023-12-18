@@ -20,6 +20,29 @@ std::string DestinationString(uint16_t destination) {
   return result;
 };
 
+PointerAddressedAddress::PointerAddressedAddress(std::string_view pointer,
+                                                 uint16_t index)
+    : pointer_(pointer), index_(index) {}
+
+std::string PointerAddressedAddress::AddressingAssembly(
+    uint16_t destination) const {
+  return absl::StrFormat(
+      "@%u\n"
+      "D=A\n"
+      "@%s\n"
+      "%s=D+M\n",
+      index_, pointer_, DestinationString(destination));
+}
+
+ArgumentAddress::ArgumentAddress(uint16_t index)
+    : PointerAddressedAddress("ARG", index) {}
+LocalAddress::LocalAddress(uint16_t index)
+    : PointerAddressedAddress("LCL", index) {}
+ThisAddress::ThisAddress(uint16_t index)
+    : PointerAddressedAddress("THIS", index) {}
+ThatAddress::ThatAddress(uint16_t index)
+    : PointerAddressedAddress("THAT", index) {}
+
 StaticAddress::StaticAddress(std::string_view class_name, uint16_t index)
     : class_name_(class_name), index_(index) {}
 

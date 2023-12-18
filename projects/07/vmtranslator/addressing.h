@@ -4,8 +4,6 @@
 #include <string>
 #include <string_view>
 
-#include "absl/strings/str_format.h"
-
 enum Destination {
   kA = 4,
   kD = 2,
@@ -19,42 +17,35 @@ class Address {
   virtual std::string AddressingAssembly(uint16_t destination) const = 0;
 };
 
-template <class Segment>
 class PointerAddressedAddress : public Address {
  public:
-  PointerAddressedAddress(uint16_t index) : index_(index) {}
-  std::string AddressingAssembly(uint16_t destination) const {
-    return absl::StrFormat(
-        "@%u\n"
-        "D=A\n"
-        "@%s\n"
-        "%s=D+M\n",
-        index_, Segment::pointer, DestinationString(destination));
-  }
+  PointerAddressedAddress(std::string_view pointer, uint16_t index);
+  std::string AddressingAssembly(uint16_t destination) const;
 
  private:
+  std::string pointer_;
   uint16_t index_;
 };
 
-struct Argument {
-  static constexpr std::string_view pointer = "ARG";
+class ArgumentAddress : public PointerAddressedAddress {
+ public:
+  ArgumentAddress(uint16_t index);
 };
-using ArgumentAddress = PointerAddressedAddress<Argument>;
 
-struct Local {
-  static constexpr std::string_view pointer = "LCL";
+class LocalAddress : public PointerAddressedAddress {
+ public:
+  LocalAddress(uint16_t index);
 };
-using LocalAddress = PointerAddressedAddress<Local>;
 
-struct This {
-  static constexpr std::string_view pointer = "THIS";
+class ThisAddress : public PointerAddressedAddress {
+ public:
+  ThisAddress(uint16_t index);
 };
-using ThisAddress = PointerAddressedAddress<This>;
 
-struct That {
-  static constexpr std::string_view pointer = "THAT";
+class ThatAddress : public PointerAddressedAddress {
+ public:
+  ThatAddress(uint16_t index);
 };
-using ThatAddress = PointerAddressedAddress<That>;
 
 class StaticAddress : public Address {
  public:
