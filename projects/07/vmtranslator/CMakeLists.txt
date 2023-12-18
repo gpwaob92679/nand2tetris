@@ -14,6 +14,7 @@ add_library(
 )
 target_link_libraries(
   commands
+  absl::strings
   absl::str_format
   addressing
 )

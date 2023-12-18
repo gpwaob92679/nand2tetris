@@ -5,116 +5,86 @@
 #include <string>
 #include <string_view>
 
-#include "absl/strings/str_format.h"
-
 class Command {
  public:
   virtual std::string ToAssembly() const = 0;
 };
 std::ostream &operator<<(std::ostream &os, const Command &command);
 
-template <class Op>
 class BinaryArithmeticCommand : public Command {
  public:
-  std::string ToAssembly() const override {
-    return absl::StrFormat(
-        "@SP\n"
-        "AM=M-1\n"
-        "D=M\n"
-        "A=A-1\n"
-        "%s\n",
-        Op::command);
-  }
-};
-
-struct Add {
-  static constexpr std::string_view command = "M=D+M";
-};
-using AddCommand = BinaryArithmeticCommand<Add>;
-
-struct Sub {
-  static constexpr std::string_view command = "M=M-D";
-};
-using SubCommand = BinaryArithmeticCommand<Sub>;
-
-struct And {
-  static constexpr std::string_view command = "M=D&M";
-};
-using AndCommand = BinaryArithmeticCommand<And>;
-
-struct Or {
-  static constexpr std::string_view command = "M=D|M";
-};
-using OrCommand = BinaryArithmeticCommand<Or>;
-
-template <class Op>
-class UnaryArithmeticCommand : public Command {
- public:
-  std::string ToAssembly() const {
-    return absl::StrFormat(
-        "@SP\n"
-        "A=M-1\n"
-        "%s\n",
-        Op::command);
-  }
-};
-
-struct Neg {
-  static constexpr std::string_view command = "M=-M";
-};
-using NegCommand = UnaryArithmeticCommand<Neg>;
-
-struct Not {
-  static constexpr std::string_view command = "M=!M";
-};
-using NotCommand = UnaryArithmeticCommand<Not>;
-
-template <class Op>
-class BinaryComparisonCommand : public Command {
- public:
-  BinaryComparisonCommand(std::string_view else_label,
-                          std::string_view end_label)
-      : else_label_(else_label), end_label_(end_label) {}
-
-  std::string ToAssembly() const {
-    return absl::StrFormat(
-        "@SP\n"
-        "AM=M-1\n"
-        "D=M\n"
-        "A=A-1\n"
-        "D=M-D\n"
-        "@%s\n"
-        "D;%s\n"
-        "@SP\n"
-        "A=M-1\n"
-        "M=-1\n"
-        "@%s\n"
-        "0;JMP\n"
-        "(%s)\n"
-        "@SP\n"
-        "A=M-1\n"
-        "M=0\n"
-        "(%s)\n",
-        else_label_, Op::jump_condition, end_label_, else_label_, end_label_);
-  }
+  BinaryArithmeticCommand(std::string_view write_command);
+  std::string ToAssembly() const override;
 
  private:
-  std::string else_label_, end_label_;
+  std::string write_command_;
 };
 
-struct Eq {
-  static constexpr std::string_view jump_condition = "JNE";
+class AddCommand : public BinaryArithmeticCommand {
+ public:
+  AddCommand();
 };
-using EqCommand = BinaryComparisonCommand<Eq>;
 
-struct Gt {
-  static constexpr std::string_view jump_condition = "JLE";
+class SubCommand : public BinaryArithmeticCommand {
+ public:
+  SubCommand();
 };
-using GtCommand = BinaryComparisonCommand<Gt>;
 
-struct Lt {
-  static constexpr std::string_view jump_condition = "JGE";
+class AndCommand : public BinaryArithmeticCommand {
+ public:
+  AndCommand();
 };
-using LtCommand = BinaryComparisonCommand<Lt>;
+
+class OrCommand : public BinaryArithmeticCommand {
+ public:
+  OrCommand();
+};
+
+class UnaryArithmeticCommand : public Command {
+ public:
+  UnaryArithmeticCommand(std::string_view write_command);
+  std::string ToAssembly() const;
+
+ private:
+  std::string write_command_;
+};
+
+class NegCommand : public UnaryArithmeticCommand {
+ public:
+  NegCommand();
+};
+
+class NotCommand : public UnaryArithmeticCommand {
+ public:
+  NotCommand();
+};
+
+class BinaryComparisonCommand : public Command {
+ public:
+  BinaryComparisonCommand(std::string_view jump_condition,
+                          std::string_view else_label,
+                          std::string_view end_label);
+  std::string ToAssembly() const;
+
+ private:
+  std::string jump_condition_;
+  std::string else_label_;
+  std::string end_label_;
+};
+
+class EqCommand : public BinaryComparisonCommand {
+ public:
+  EqCommand(std::string_view label);
+};
+
+class GtCommand : public BinaryComparisonCommand {
+ public:
+  GtCommand(std::string_view label);
+};
+
+class LtCommand : public BinaryComparisonCommand {
+ public:
+  LtCommand(std::string_view label);
+};
 
 #endif  // NAND2TETRIS_VMTRANSLATOR_COMMANDS_H_
