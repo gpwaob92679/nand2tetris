@@ -27,4 +27,4 @@ include(GoogleTest)
 enable_testing()
 
 add_subdirectory(projects/06/assembler)
-add_subdirectory(projects/07/vmtranslator)
+add_subdirectory(projects/08/vmtranslator)
