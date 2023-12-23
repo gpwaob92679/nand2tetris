@@ -18,6 +18,9 @@ class VmFile {
   Command *command();
 
  private:
+  std::unique_ptr<Address> ParseAddress(std::string_view segment,
+                                        std::string_view index_str);
+
   std::string filename_;
   std::ifstream file_;
 

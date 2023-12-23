@@ -26,9 +26,8 @@ VmFile::~VmFile() {
   delete command_;
 }
 
-std::unique_ptr<Address> ParseAddress(std::string_view filename,
-                                      std::string_view segment,
-                                      std::string_view index_str) {
+std::unique_ptr<Address> VmFile::ParseAddress(std::string_view segment,
+                                              std::string_view index_str) {
   uint16_t index = std::stoi(index_str.data());
   if (segment == "argument") {
     return std::make_unique<ArgumentAddress>(index);
@@ -37,7 +36,7 @@ std::unique_ptr<Address> ParseAddress(std::string_view filename,
     return std::make_unique<LocalAddress>(index);
   }
   if (segment == "static") {
-    return std::make_unique<StaticAddress>(filename, index);
+    return std::make_unique<StaticAddress>(filename_, index);
   }
   if (segment == "constant") {
     return std::make_unique<ConstantAddress>(index);
@@ -98,11 +97,11 @@ void VmFile::Advance() {
   } else if (tokens[0] == "push") {
     QCHECK_EQ(tokens.size(), 3) << filename_ << ':' << line_number_
                                 << ": Invalid push command: " << line_;
-    command_ = new PushCommand(ParseAddress(filename_, tokens[1], tokens[2]));
+    command_ = new PushCommand(ParseAddress(tokens[1], tokens[2]));
   } else if (tokens[0] == "pop") {
     QCHECK_EQ(tokens.size(), 3) << filename_ << ':' << line_number_
                                 << ": Invalid pop command: " << line_;
-    command_ = new PopCommand(ParseAddress(filename_, tokens[1], tokens[2]));
+    command_ = new PopCommand(ParseAddress(tokens[1], tokens[2]));
   } else {
     LOG(ERROR) << filename_ << ':' << line_number_
                << ": Unknown command: " << line_;
