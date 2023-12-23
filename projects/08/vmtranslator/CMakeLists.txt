@@ -41,8 +41,12 @@ add_executable(
 target_link_libraries(
   vmtranslator
   absl::check
+  absl::flags
+  absl::flags_parse
+  absl::flags_usage
   absl::log
   absl::strings
+  absl::str_format
   commands
   parser
 )

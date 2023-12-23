@@ -60,14 +60,14 @@ std::unique_ptr<Address> ParseAddress(std::string_view filename,
 
 void VmFile::Advance() {
   if (command_) {
+    line_.clear();
     delete command_;
     command_ = nullptr;
   }
 
-  std::string line;
   std::vector<std::string_view> tokens;
-  while (tokens.empty() && std::getline(file_, line)) {
-    std::string_view line_view = line;
+  while (tokens.empty() && std::getline(file_, line_)) {
+    std::string_view line_view = line_;
     ++line_number_;
     line_view = line_view.substr(0, line_view.find("//"));
     tokens =
@@ -97,16 +97,17 @@ void VmFile::Advance() {
     command_ = new NotCommand();
   } else if (tokens[0] == "push") {
     QCHECK_EQ(tokens.size(), 3) << filename_ << ':' << line_number_
-                                << ": Invalid push command: " << line;
+                                << ": Invalid push command: " << line_;
     command_ = new PushCommand(ParseAddress(filename_, tokens[1], tokens[2]));
   } else if (tokens[0] == "pop") {
     QCHECK_EQ(tokens.size(), 3) << filename_ << ':' << line_number_
-                                << ": Invalid pop command: " << line;
+                                << ": Invalid pop command: " << line_;
     command_ = new PopCommand(ParseAddress(filename_, tokens[1], tokens[2]));
   } else {
     LOG(ERROR) << filename_ << ':' << line_number_
-               << ": Unknown command: " << line;
+               << ": Unknown command: " << line_;
   }
 }
 
+std::string VmFile::line() { return line_; }
 Command *VmFile::command() { return command_; }
