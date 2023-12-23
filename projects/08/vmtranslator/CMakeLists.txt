@@ -84,6 +84,8 @@ set(
   ../../07/MemoryAccess/BasicTest/
   ../../07/MemoryAccess/PointerTest/
   ../../07/MemoryAccess/StaticTest/
+  ../ProgramFlow/BasicLoop/
+  ../ProgramFlow/FibonacciSeries/
 )
 
 if(WIN32)

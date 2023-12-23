@@ -126,3 +126,30 @@ std::string PopCommand::ToAssembly() const {
       "M=D\n",
       address_->AddressingAssembly(Destination::kA));
 }
+
+LabelCommand::LabelCommand(std::string_view label) : label_(label) {}
+
+std::string LabelCommand::ToAssembly() const {
+  return absl::StrFormat("(%s)\n", label_);
+}
+
+GotoCommand::GotoCommand(std::string_view label) : label_(label) {}
+
+std::string GotoCommand::ToAssembly() const {
+  return absl::StrFormat(
+      "@%s\n"
+      "0;JMP\n",
+      label_);
+}
+
+IfGotoCommand::IfGotoCommand(std::string_view label) : label_(label) {}
+
+std::string IfGotoCommand::ToAssembly() const {
+  return absl::StrFormat(
+      "@SP\n"
+      "AM=M-1\n"
+      "D=M\n"
+      "@%s\n"
+      "D;JNE\n",
+      label_);
+}

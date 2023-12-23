@@ -318,3 +318,22 @@ TEST(PopCommandTest, TempAddress) {
             "@10\n"
             "M=D\n");
 }
+
+TEST(LabelCommandTest, LabelCommand) {
+  EXPECT_EQ(LabelCommand("Foo.f$L1").ToAssembly(), "(Foo.f$L1)\n");
+}
+
+TEST(GotoCommandTest, GotoCommand) {
+  EXPECT_EQ(GotoCommand("Foo.f$L1").ToAssembly(),
+            "@Foo.f$L1\n"
+            "0;JMP\n");
+}
+
+TEST(IfGotoCommandTest, IfGotoCommand) {
+  EXPECT_EQ(IfGotoCommand("Foo.f$L1").ToAssembly(),
+            "@SP\n"
+            "AM=M-1\n"
+            "D=M\n"
+            "@Foo.f$L1\n"
+            "D;JNE\n");
+}

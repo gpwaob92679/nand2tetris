@@ -15,6 +15,7 @@ class VmFile {
   void VmFile::Advance();
 
   std::string line();
+  std::string function();
   Command *command();
 
  private:
@@ -26,6 +27,7 @@ class VmFile {
 
   std::string line_;
   size_t line_number_ = 0;
+  std::string function_;
   Command *command_ = nullptr;
 };
 

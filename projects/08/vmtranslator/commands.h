@@ -108,4 +108,31 @@ class PopCommand : public Command {
   std::unique_ptr<Address> address_;
 };
 
+class LabelCommand : public Command {
+ public:
+  LabelCommand(std::string_view label);
+  std::string ToAssembly() const override;
+
+ private:
+  std::string label_;
+};
+
+class GotoCommand : public Command {
+ public:
+  GotoCommand(std::string_view label);
+  std::string ToAssembly() const override;
+
+ private:
+  std::string label_;
+};
+
+class IfGotoCommand : public Command {
+ public:
+  IfGotoCommand(std::string_view label);
+  std::string ToAssembly() const override;
+
+ private:
+  std::string label_;
+};
+
 #endif  // NAND2TETRIS_VMTRANSLATOR_COMMANDS_H_

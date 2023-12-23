@@ -8,6 +8,7 @@
 
 #include "absl/log/check.h"
 #include "absl/log/log.h"
+#include "absl/strings/str_cat.h"
 #include "absl/strings/str_format.h"
 #include "absl/strings/str_split.h"
 
@@ -16,7 +17,8 @@
 
 VmFile::VmFile(std::string_view filename)
     : filename_(std::filesystem::path(filename).stem().string()),
-      file_(filename.data()) {
+      file_(filename.data()),
+      function_(absl::StrCat(filename_, ".GLOBAL")) {
   QCHECK(file_.is_open()) << "Could not open file: " << filename;
   Advance();
 }
@@ -102,6 +104,19 @@ void VmFile::Advance() {
     QCHECK_EQ(tokens.size(), 3) << filename_ << ':' << line_number_
                                 << ": Invalid pop command: " << line_;
     command_ = new PopCommand(ParseAddress(tokens[1], tokens[2]));
+  } else if (tokens[0] == "label") {
+    QCHECK_EQ(tokens.size(), 2) << filename_ << ':' << line_number_
+                                << ": Invalid label command: " << line_;
+    command_ = new LabelCommand(absl::StrFormat("%s$%s", function_, tokens[1]));
+  } else if (tokens[0] == "goto") {
+    QCHECK_EQ(tokens.size(), 2) << filename_ << ':' << line_number_
+                                << ": Invalid goto command: " << line_;
+    command_ = new GotoCommand(absl::StrFormat("%s$%s", function_, tokens[1]));
+  } else if (tokens[0] == "if-goto") {
+    QCHECK_EQ(tokens.size(), 2) << filename_ << ':' << line_number_
+                                << ": Invalid if-goto command: " << line_;
+    command_ =
+        new IfGotoCommand(absl::StrFormat("%s$%s", function_, tokens[1]));
   } else {
     LOG(ERROR) << filename_ << ':' << line_number_
                << ": Unknown command: " << line_;
@@ -109,4 +124,5 @@ void VmFile::Advance() {
 }
 
 std::string VmFile::line() { return line_; }
+std::string VmFile::function() { return function_; }
 Command *VmFile::command() { return command_; }
