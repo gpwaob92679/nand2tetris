@@ -14,15 +14,18 @@ class VmFile {
 
   void VmFile::Advance();
 
+  std::string path();
   std::string line();
+  size_t line_number();
   Command *command();
 
  private:
   std::unique_ptr<Address> ParseAddress(std::string_view segment,
                                         std::string_view index_str);
 
-  std::string filename_;
   std::ifstream file_;
+  std::string path_;
+  std::string filename_;
 
   std::string line_;
   size_t line_number_ = 0;
