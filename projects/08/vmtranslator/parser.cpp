@@ -117,6 +117,20 @@ void VmFile::Advance() {
                                 << ": Invalid if-goto command: " << line_;
     command_ =
         new IfGotoCommand(absl::StrFormat("%s$%s", function_, tokens[1]));
+  } else if (tokens[0] == "call") {
+    QCHECK_EQ(tokens.size(), 3) << filename_ << ':' << line_number_
+                                << ": Invalid call command: " << line_;
+    command_ =
+        new CallCommand(tokens[1], std::stoi(tokens[2].data()),
+                        absl::StrFormat("%s_%d$ret", filename_, line_number_));
+  } else if (tokens[0] == "function") {
+    QCHECK_EQ(tokens.size(), 3) << filename_ << ':' << line_number_
+                                << ": Invalid function command: " << line_;
+    command_ = new FunctionCommand(tokens[1], std::stoi(tokens[2].data()));
+  } else if (tokens[0] == "return") {
+    QCHECK_EQ(tokens.size(), 1) << filename_ << ':' << line_number_
+                                << ": Invalid return command: " << line_;
+    command_ = new ReturnCommand();
   } else {
     LOG(ERROR) << filename_ << ':' << line_number_
                << ": Unknown command: " << line_;

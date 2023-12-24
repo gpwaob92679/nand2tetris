@@ -86,6 +86,7 @@ set(
   ../../07/MemoryAccess/StaticTest/
   ../ProgramFlow/BasicLoop/
   ../ProgramFlow/FibonacciSeries/
+  ../FunctionCalls/SimpleFunction/
 )
 
 if(WIN32)

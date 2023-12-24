@@ -135,4 +135,31 @@ class IfGotoCommand : public Command {
   std::string label_;
 };
 
+class CallCommand : public Command {
+ public:
+  CallCommand(std::string_view function, int argument_count,
+              std::string_view return_label);
+  std::string ToAssembly() const override;
+
+ private:
+  std::string function_;
+  int argument_count_;
+  std::string return_label_;
+};
+
+class FunctionCommand : public Command {
+ public:
+  FunctionCommand(std::string_view identifier, int variable_count);
+  std::string ToAssembly() const override;
+
+ private:
+  std::string identifier_;
+  int variable_count_;
+};
+
+class ReturnCommand : public Command {
+ public:
+  std::string ToAssembly() const override;
+};
+
 #endif  // NAND2TETRIS_VMTRANSLATOR_COMMANDS_H_
