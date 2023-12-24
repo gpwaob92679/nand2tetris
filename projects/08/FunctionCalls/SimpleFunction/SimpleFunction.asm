@@ -1,3 +1,7 @@
+@256
+D=A
+@SP
+M=D
 (SimpleFunction.test)
 @SP
 A=M
@@ -65,6 +69,13 @@ AM=M-1
 D=M
 A=A-1
 M=M-D
+@5
+D=A
+@LCL
+A=M-D
+D=M
+@R15
+M=D
 @SP
 A=M-1
 D=M
@@ -94,13 +105,6 @@ A=M-D
 D=M
 @ARG
 M=D
-@5
-D=A
-@LCL
-A=M-D
-D=M
-@R15
-M=D
 @4
 D=A
 @LCL
@@ -111,6 +115,6 @@ M=D
 @R15
 A=M
 0;JMP
-(END)
 @END
+(END)
 0;JMP
