@@ -60,6 +60,7 @@ add_executable(
 target_link_libraries(
   addressing_test
   addressing
+  absl::str_format
   GTest::gtest_main
 )
 gtest_discover_tests(addressing_test)
