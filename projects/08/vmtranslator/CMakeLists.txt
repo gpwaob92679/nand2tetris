@@ -51,6 +51,11 @@ target_link_libraries(
   parser
 )
 
+install(
+  TARGETS vmtranslator
+  DESTINATION ${CMAKE_SOURCE_DIR}/projects/bin
+)
+
 # Unit tests
 
 add_executable(
