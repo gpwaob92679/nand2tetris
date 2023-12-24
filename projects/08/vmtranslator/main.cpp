@@ -14,7 +14,57 @@
 #include "commands.h"
 #include "parser.h"
 
-ABSL_FLAG(bool, v, false, "Output assembly code to console");
+ABSL_FLAG(bool, v, false, "verbose output, print assembly output to console");
+
+class AssemblyFile {
+ public:
+  AssemblyFile(std::string_view path, bool source_is_multi_file)
+      : file_(path.data()), source_is_multi_file_(source_is_multi_file) {
+    QCHECK(file_.is_open()) << "Could not open output file: " << path;
+    LOG(INFO) << "Output: " << path;
+    LOG(INFO) << "Source is multi-file: " << source_is_multi_file;
+
+    // Bootstrap code.
+    file_ << "@256\n"
+          << "D=A\n"
+          << "@SP\n"
+          << "M=D\n";
+
+    if (source_is_multi_file_) {
+      file_ << CallCommand("Sys.init", 0, "END").ToAssembly();
+      // Although `Sys.init` is expected to enter an infinite loop, we still add
+      // an infinite loop in case `Sys.init` returns.
+      file_ << "@END\n"
+            << "(END)\n"
+            << "0;JMP\n";
+    }
+  }
+
+  ~AssemblyFile() {
+    if (!source_is_multi_file_) {
+      file_ << "@END\n"
+            << "(END)\n"
+            << "0;JMP\n";
+    }
+    file_.close();
+  }
+
+  void Write(std::string_view line) { file_ << line; }
+
+ private:
+  std::ofstream file_;
+  bool source_is_multi_file_ = false;
+};
+
+void Translate(VmFile &vm_file, AssemblyFile &asm_file) {
+  while (vm_file.command()) {
+    if (absl::GetFlag(FLAGS_v)) {
+      LOG(INFO) << vm_file.line() << " ->\n" << vm_file.command()->ToAssembly();
+    }
+    asm_file.Write(vm_file.command()->ToAssembly());
+    vm_file.Advance();
+  }
+}
 
 int main(int argc, char *argv[]) {
   absl::SetProgramUsageMessage(
@@ -42,52 +92,17 @@ int main(int argc, char *argv[]) {
   }
   CHECK(!program_name.empty());
   LOG(INFO) << "Program: " << program_name;
-  LOG(INFO) << "Output: " << asm_path;
 
-  std::ofstream asm_file(asm_path);
-  CHECK(asm_file.is_open()) << "Could not open output file: " << asm_path;
-  // Bootstrap code.
-  asm_file << "@256\n"
-           << "D=A\n"
-           << "@SP\n"
-           << "M=D\n";
-
+  AssemblyFile asm_file(asm_path.string(), source.is_directory());
   if (source.is_directory()) {
-    // Although `Sys.init` is expected to enter an infinite loop, we still add
-    // an infinite loop in case `Sys.init` returns.
-    asm_file << CallCommand("Sys.init", 0, "END").ToAssembly();
-    asm_file << "@END\n"
-             << "(END)\n"
-             << "0;JMP\n";
-
     for (const std::filesystem::directory_entry &entry :
          std::filesystem::directory_iterator(source)) {
       if (entry.path().extension() == ".vm") {
-        LOG(INFO) << "Translating: " << entry.path();
-        VmFile vm_file(entry.path().string());
-        while (vm_file.command()) {
-          if (absl::GetFlag(FLAGS_v)) {
-            LOG(INFO) << vm_file.line() << " ->\n"
-                      << vm_file.command()->ToAssembly();
-          }
-          asm_file << vm_file.command()->ToAssembly();
-          vm_file.Advance();
-        }
+        Translate(VmFile(entry.path().string()), asm_file);
       }
     }
   } else {
-    VmFile vm_file(positional_args[1]);
-    while (vm_file.command()) {
-      if (absl::GetFlag(FLAGS_v)) {
-        LOG(INFO) << vm_file.line() << " ->\n"
-                  << vm_file.command()->ToAssembly();
-      }
-      asm_file << vm_file.command()->ToAssembly();
-      vm_file.Advance();
-    }
-    asm_file << "@END\n"
-             << "(END)\n"
-             << "0;JMP\n";
+    Translate(VmFile(positional_args[1]), asm_file);
   }
   return 0;
 }
