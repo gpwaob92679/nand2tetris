@@ -15,11 +15,12 @@
 #include "addressing.h"
 #include "commands.h"
 
-VmFile::VmFile(std::string_view filename)
-    : filename_(std::filesystem::path(filename).stem().string()),
-      file_(filename.data()),
+VmFile::VmFile(std::string_view path)
+    : filename_(std::filesystem::path(path).stem().string()),
+      file_(path.data()),
       function_(absl::StrCat(filename_, ".GLOBAL")) {
-  QCHECK(file_.is_open()) << "Could not open file: " << filename;
+  QCHECK(file_.is_open()) << "Could not open file: " << path;
+  LOG(INFO) << "Processing VM file: " << path;
   Advance();
 }
 
@@ -138,5 +139,4 @@ void VmFile::Advance() {
 }
 
 std::string VmFile::line() { return line_; }
-std::string VmFile::function() { return function_; }
 Command *VmFile::command() { return command_; }

@@ -9,13 +9,12 @@
 
 class VmFile {
  public:
-  VmFile(std::string_view filename);
+  VmFile(std::string_view path);
   ~VmFile();
 
   void VmFile::Advance();
 
   std::string line();
-  std::string function();
   Command *command();
 
  private:
