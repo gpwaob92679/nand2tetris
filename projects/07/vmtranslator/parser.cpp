@@ -1,5 +1,6 @@
 #include "parser.h"
 
+#include <cstdint>
 #include <filesystem>
 #include <memory>
 #include <string>

@@ -1,5 +1,6 @@
 #include <algorithm>
 #include <bitset>
+#include <cstdint>
 #include <filesystem>
 #include <fstream>
 #include <iostream>

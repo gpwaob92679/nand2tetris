@@ -85,7 +85,7 @@ int main(int argc, char *argv[]) {
   std::filesystem::directory_entry source(positional_args[1]);
   QCHECK(source.exists()) << "File or directory does not exist: "
                           << positional_args[1];
-  LOG(INFO) << "Source: " << source.path();
+  LOG(INFO) << "Source: " << source.path().string();
 
   std::string program_name;
   std::filesystem::path asm_path;
@@ -108,11 +108,13 @@ int main(int argc, char *argv[]) {
     for (const std::filesystem::directory_entry &entry :
          std::filesystem::directory_iterator(source)) {
       if (entry.path().extension() == ".vm") {
-        Translate(VmFile(entry.path().string()), asm_file);
+        VmFile vm_file(entry.path().string());
+        Translate(vm_file, asm_file);
       }
     }
   } else {
-    Translate(VmFile(positional_args[1]), asm_file);
+    VmFile vm_file(positional_args[1]);
+    Translate(vm_file, asm_file);
   }
   return 0;
 }

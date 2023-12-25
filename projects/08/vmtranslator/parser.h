@@ -1,4 +1,3 @@
-
 #ifndef NAND2TETRIS_VMTRANSLATOR_PARSER_H_
 #define NAND2TETRIS_VMTRANSLATOR_PARSER_H_
 
@@ -12,7 +11,7 @@ class VmFile {
   VmFile(std::string_view path);
   ~VmFile();
 
-  void VmFile::Advance();
+  void Advance();
 
   std::string path();
   std::string line();

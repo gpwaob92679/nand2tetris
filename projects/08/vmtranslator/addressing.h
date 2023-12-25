@@ -1,6 +1,7 @@
 #ifndef NAND2TETRIS_VMTRANSLATOR_ADDRESSING_H_
 #define NAND2TETRIS_VMTRANSLATOR_ADDRESSING_H_
 
+#include <cstdint>
 #include <string>
 #include <string_view>
 
