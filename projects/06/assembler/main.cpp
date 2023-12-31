@@ -144,9 +144,10 @@ bool IsNumber(std::string_view str) {
 }
 
 int main(int argc, char *argv[]) {
-  CHECK_GE(argc, 2) << "No input file";
+  QCHECK_GE(argc, 2) << "Usage: " << argv[0] << " SOURCE";
   std::ifstream asm_file(argv[1]);
-  CHECK(asm_file.is_open()) << "Failed to open input file '" << argv[1] << "'";
+  QCHECK(asm_file.is_open()) << "Failed to open input file '" << argv[1] << "'";
+  LOG(INFO) << "Source: " << argv[1];
 
   std::string buffer;
   std::vector<std::string> trimmed_lines;
@@ -182,11 +183,12 @@ int main(int argc, char *argv[]) {
     }
   }
 
-  std::string hack_filename = std::filesystem::path(argv[1]).stem().string();
-  absl::StrAppend(&hack_filename, ".hack");
-  std::ofstream hack_file(hack_filename);
+  std::filesystem::path hack_path(argv[1]);
+  hack_path.replace_extension(".hack");
+  std::ofstream hack_file(hack_path);
   CHECK(hack_file.is_open())
-      << "Failed to open output file '" << hack_filename << "'";
+      << "Failed to open output file " << hack_path.string();
+  LOG(INFO) << "Output: " << hack_path.string();
 
   uint16_t variable_address = 16;
   for (const std::string &line : trimmed_lines) {
