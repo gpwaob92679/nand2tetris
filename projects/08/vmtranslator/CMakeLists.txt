@@ -135,10 +135,16 @@ foreach(program ${test_programs})
     COMMAND
       ${CPUEmulator} test_programs/${basename}/${basename}.tst
   )
+
+  set_tests_properties(
+    "Translation: ${program}"
+    PROPERTIES
+      FIXTURES_SETUP "${program}"
+  )
   set_tests_properties(
     "Comparison: ${program}"
     PROPERTIES
-      DEPENDS "Translation: ${program}"
+      FIXTURES_REQUIRED "${program}"
       PASS_REGULAR_EXPRESSION "End of script - Comparison ended successfully"
   )
 endforeach()
