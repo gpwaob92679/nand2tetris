@@ -102,12 +102,6 @@ set(
   ../FunctionCalls/StaticsTest/
 )
 
-if(WIN32)
-  set(CPUEmulator ${CMAKE_SOURCE_DIR}/tools/CPUEmulator.bat)
-else()
-  set(CPUEmulator ${CMAKE_SOURCE_DIR}/tools/CPUEmulator.sh)
-endif()
-
 foreach(program ${test_programs})
   cmake_path(REMOVE_FILENAME program)
   message(STATUS "Adding test VM program: " ${program})

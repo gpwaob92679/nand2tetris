@@ -27,5 +27,13 @@ include(GoogleTest)
 
 enable_testing()
 
+if(WIN32)
+  set(CPUEmulator "${CMAKE_SOURCE_DIR}/tools/CPUEmulator.bat")
+  set(TextComparer "${CMAKE_SOURCE_DIR}/tools/TextComparer.bat")
+else()
+  set(CPUEmulator "${CMAKE_SOURCE_DIR}/tools/CPUEmulator.sh")
+  set(TextComparer "${CMAKE_SOURCE_DIR}/tools/TextComparer.sh")
+endif()
+
 add_subdirectory(projects/06/assembler)
 add_subdirectory(projects/08/vmtranslator)

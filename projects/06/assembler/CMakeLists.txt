@@ -25,12 +25,6 @@ set(
   ../rect/RectL.asm
 )
 
-if(WIN32)
-  set(TextComparer "${CMAKE_SOURCE_DIR}/tools/TextComparer.bat")
-else()
-  set(TextComparer "${CMAKE_SOURCE_DIR}/tools/TextComparer.sh")
-endif()
-
 foreach(program ${test_programs})
   message(STATUS "Adding test assembly program: " ${program})
   file(
