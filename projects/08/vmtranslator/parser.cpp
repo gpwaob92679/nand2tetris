@@ -22,7 +22,6 @@ VmFile::VmFile(std::string_view path)
       filename_(std::filesystem::path(path_).stem().string()),
       function_(absl::StrCat(filename_, ".GLOBAL")) {
   QCHECK(file_.is_open()) << "Could not open file: " << path;
-  LOG(INFO) << "Processing VM file: " << path;
   Advance();
 }
 

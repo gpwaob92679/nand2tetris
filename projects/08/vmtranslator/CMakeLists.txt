@@ -33,6 +33,17 @@ target_link_libraries(
   commands
 )
 
+add_library(
+  output
+  output.cpp
+)
+target_link_libraries(
+  output
+  absl::check
+  absl::log
+  commands
+)
+
 add_executable(
   vmtranslator
   main.cpp
@@ -48,6 +59,7 @@ target_link_libraries(
   absl::strings
   absl::str_format
   commands
+  output
   parser
 )
 

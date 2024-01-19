@@ -1,5 +1,4 @@
 #include <filesystem>
-#include <iostream>
 #include <vector>
 
 #include "absl/flags/flag.h"
@@ -9,60 +8,16 @@
 #include "absl/log/log.h"
 #include "absl/strings/str_cat.h"
 #include "absl/strings/str_format.h"
-#include "absl/strings/strip.h"
 
-#include "commands.h"
+#include "output.h"
 #include "parser.h"
 
 ABSL_FLAG(bool, v, false, "verbose output, print assembly output to console");
 ABSL_FLAG(bool, d, false,
           "debug mode, write VM source lines as comments in assembly output");
 
-class AssemblyFile {
- public:
-  AssemblyFile(std::string_view path, bool source_is_multi_file)
-      : file_(path.data()), source_is_multi_file_(source_is_multi_file) {
-    QCHECK(file_.is_open()) << "Could not open output file: " << path;
-    LOG(INFO) << "Output: " << path;
-    LOG(INFO) << "Source is multi-file: " << source_is_multi_file;
-
-    // Bootstrap code.
-    file_ << "@256\n"
-          << "D=A\n"
-          << "@SP\n"
-          << "M=D\n";
-
-    if (source_is_multi_file_) {
-      file_ << CallCommand("Sys.init", 0, "END").ToAssembly();
-      // Although `Sys.init` is expected to enter an infinite loop, we still add
-      // an infinite loop in case `Sys.init` returns.
-      file_ << "@END\n"
-            << "(END)\n"
-            << "0;JMP\n";
-    }
-  }
-
-  ~AssemblyFile() {
-    if (!source_is_multi_file_) {
-      file_ << "@END\n"
-            << "(END)\n"
-            << "0;JMP\n";
-    }
-    file_.close();
-  }
-
-  template <class T>
-  AssemblyFile &operator<<(const T &value) {
-    file_ << value;
-    return *this;
-  }
-
- private:
-  std::ofstream file_;
-  bool source_is_multi_file_ = false;
-};
-
 void Translate(VmFile &vm_file, AssemblyFile &asm_file) {
+  LOG(INFO) << "Processing VM file: " << vm_file.path();
   while (vm_file.command()) {
     if (absl::GetFlag(FLAGS_v)) {
       LOG(INFO) << vm_file.line() << " ->\n" << vm_file.command()->ToAssembly();
@@ -87,6 +42,7 @@ int main(int argc, char *argv[]) {
                           << positional_args[1];
   LOG(INFO) << "Source: " << source.path().string();
 
+  // Determine program name and output path.
   std::string program_name;
   std::filesystem::path asm_path;
   if (source.is_directory()) {
@@ -103,8 +59,10 @@ int main(int argc, char *argv[]) {
   CHECK(!program_name.empty());
   LOG(INFO) << "Program: " << program_name;
 
+  // Translate.
   AssemblyFile asm_file(asm_path.string(), source.is_directory());
   if (source.is_directory()) {
+    LOG(INFO) << "Multi-file source mode";
     for (const std::filesystem::directory_entry &entry :
          std::filesystem::directory_iterator(source)) {
       if (entry.path().extension() == ".vm") {
@@ -113,6 +71,7 @@ int main(int argc, char *argv[]) {
       }
     }
   } else {
+    LOG(INFO) << "Single-file source mode";
     VmFile vm_file(positional_args[1]);
     Translate(vm_file, asm_file);
   }
