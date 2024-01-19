@@ -37,3 +37,4 @@ endif()
 
 add_subdirectory(projects/06/assembler)
 add_subdirectory(projects/08/vmtranslator)
+add_subdirectory(projects/10/jackanalyzer)
