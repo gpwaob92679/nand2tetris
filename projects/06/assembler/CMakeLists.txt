@@ -1,3 +1,6 @@
+message(STATUS "Configuring project 6: Assembler")
+list(APPEND CMAKE_MESSAGE_INDENT "  ")
+
 add_executable(
   assembler
   main.cpp
@@ -34,23 +37,25 @@ foreach(program ${test_programs})
 
   cmake_path(GET program STEM program_stem)
   add_test(
-    NAME "Assemble: ${program}"
+    NAME "assembler: Assemble ${program}"
     COMMAND assembler "test_programs/${program_stem}.asm"
   )
   add_test(
-    NAME "Comparison: ${program}"
+    NAME "assembler: Compare ${program}"
     COMMAND "${TextComparer}" "test_programs/${program_stem}.hack" "${CMAKE_CURRENT_SOURCE_DIR}/../expected/${program_stem}.hack"
   )
 
   set_tests_properties(
-    "Assemble: ${program}"
+    "assembler: Assemble ${program}"
     PROPERTIES
-      FIXTURES_SETUP "${program}"
+      FIXTURES_SETUP "assembler: ${program}"
   )
   set_tests_properties(
-    "Comparison: ${program}"
+    "assembler: Compare ${program}"
     PROPERTIES
-      FIXTURES_REQUIRED "${program}"
+      FIXTURES_REQUIRED "assembler: ${program}"
       PASS_REGULAR_EXPRESSION "Comparison ended successfully"
   )
 endforeach()
+
+list(POP_BACK CMAKE_MESSAGE_INDENT)

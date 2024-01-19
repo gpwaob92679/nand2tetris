@@ -1,47 +1,50 @@
+message(STATUS "Configuring project 8: VM translator")
+list(APPEND CMAKE_MESSAGE_INDENT "  ")
+
 add_library(
-  addressing
+  vmtranslator_addressing
   addressing.cpp
 )
 target_link_libraries(
-  addressing
+  vmtranslator_addressing
   absl::log
   absl::str_format
 )
 
 add_library(
-  commands
+  vmtranslator_commands
   commands.cpp
 )
 target_link_libraries(
-  commands
+  vmtranslator_commands
   absl::strings
   absl::str_format
-  addressing
+  vmtranslator_addressing
 )
 
 add_library(
-  parser
+  vmtranslator_parser
   parser.cpp
 )
 target_link_libraries(
-  parser
+  vmtranslator_parser
   absl::check
   absl::log
   absl::strings
   absl::str_format
-  addressing
-  commands
+  vmtranslator_addressing
+  vmtranslator_commands
 )
 
 add_library(
-  output
+  vmtranslator_output
   output.cpp
 )
 target_link_libraries(
-  output
+  vmtranslator_output
   absl::check
   absl::log
-  commands
+  vmtranslator_commands
 )
 
 add_executable(
@@ -58,9 +61,9 @@ target_link_libraries(
   absl::log
   absl::strings
   absl::str_format
-  commands
-  output
-  parser
+  vmtranslator_commands
+  vmtranslator_output
+  vmtranslator_parser
 )
 
 install(
@@ -76,11 +79,14 @@ add_executable(
 )
 target_link_libraries(
   addressing_test
-  addressing
+  vmtranslator_addressing
   absl::str_format
   GTest::gtest_main
 )
-gtest_discover_tests(addressing_test)
+gtest_discover_tests(
+  addressing_test
+  TEST_PREFIX "vmtranslator::"
+)
 
 add_executable(
   commands_test
@@ -88,10 +94,13 @@ add_executable(
 )
 target_link_libraries(
   commands_test
-  commands
+  vmtranslator_commands
   GTest::gtest_main
 )
-gtest_discover_tests(commands_test)
+gtest_discover_tests(
+  commands_test
+  TEST_PREFIX "vmtranslator::"
+)
 
 # Test programs
 
@@ -130,31 +139,29 @@ foreach(program ${test_programs})
   )
 
   add_test(
-    NAME
-      "Translation: ${program}"
+    NAME "vmtranslator: Translate ${program}"
     COMMAND
       vmtranslator test_programs/${basename}/${basename}.vm
   )
   add_test(
     NAME
-      "Comparison: ${program}"
+      "vmtranslator: Compare ${program}"
     COMMAND
       ${CPUEmulator} test_programs/${basename}/${basename}.tst
   )
 
   set_tests_properties(
-    "Translation: ${program}"
+    "vmtranslator: Translate ${program}"
     PROPERTIES
-      FIXTURES_SETUP "${program}"
+      FIXTURES_SETUP "vmtranslator: ${program}"
   )
   set_tests_properties(
-    "Comparison: ${program}"
+    "vmtranslator: Compare ${program}"
     PROPERTIES
-      FIXTURES_REQUIRED "${program}"
+      FIXTURES_REQUIRED "vmtranslator: ${program}"
       PASS_REGULAR_EXPRESSION "End of script - Comparison ended successfully"
   )
 endforeach()
-
 
 foreach(program ${full_test_programs})
   cmake_path(REMOVE_FILENAME program)
@@ -172,21 +179,25 @@ foreach(program ${full_test_programs})
   )
 
   add_test(
-    NAME
-      "Translation: ${program}"
-    COMMAND
-      vmtranslator test_programs/${basename}/
+    NAME "vmtranslator: Translate ${program}"
+    COMMAND vmtranslator "test_programs/${basename}/"
   )
   add_test(
-    NAME
-      "Comparison: ${program}"
-    COMMAND
-      ${CPUEmulator} test_programs/${basename}/${basename}.tst
+    NAME "vmtranslator: Compare ${program}"
+    COMMAND "${CPUEmulator}" "test_programs/${basename}/${basename}.tst"
+  )
+
+  set_tests_properties(
+    "vmtranslator: Translate ${program}"
+    PROPERTIES
+      FIXTURES_SETUP "vmtranslator: ${program}"
   )
   set_tests_properties(
-    "Comparison: ${program}"
+    "vmtranslator: Compare ${program}"
     PROPERTIES
-      DEPENDS "Translation: ${program}"
+      FIXTURES_REQUIRED "vmtranslator: ${program}"
       PASS_REGULAR_EXPRESSION "End of script - Comparison ended successfully"
   )
 endforeach()
+
+list(POP_BACK CMAKE_MESSAGE_INDENT)
