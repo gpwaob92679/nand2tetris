@@ -21,7 +21,27 @@ class Token {
 
   std::string ToXmlElement() const;
 
+  static bool IsKeyword(std::string_view token) {
+    for (const std::string_view& keyword : kKeywords) {
+      if (token == keyword) {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  static bool IsSymbol(char c) {
+    return kSymbols.find(c) != std::string_view::npos;
+  }
+
  private:
+  static constexpr std::string_view kKeywords[] = {
+      "class", "constructor", "function", "method",  "field", "static",
+      "var",   "int",         "char",     "boolean", "void",  "true",
+      "false", "null",        "this",     "let",     "do",    "if",
+      "else",  "while",       "return"};
+  static constexpr std::string_view kSymbols = "{}()[].,;+-*/&|<>=~";
+
   TokenType type_;
   std::string value_;
 };
@@ -32,19 +52,13 @@ class JackFile {
 
   void Advance();
 
-  std::string path() const;
-  Token* token();
+  Token* token() const { return token_; }
 
  private:
-  static constexpr std::string_view kKeywords[] = {
-      "class", "constructor", "function", "method",  "field", "static",
-      "var",   "int",         "char",     "boolean", "void",  "true",
-      "false", "null",        "this",     "let",     "do",    "if",
-      "else",  "while",       "return"};
-  static constexpr std::string_view kSymbols = "{}()[].,;+-*/&|<>=~";
-
-  static bool IsKeyword(std::string_view token);
-  static bool IsSymbol(char c);
+  bool ReadComment();
+  void ReadIntegerConstant();
+  void ReadStringConstant();
+  void ReadKeywordOrIdentifier();
 
   std::ifstream file_;
   std::string path_;

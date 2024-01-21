@@ -1,12 +1,12 @@
 #include "tokenizer.h"
 
-#include <cctype>
 #include <limits>
 #include <string>
 #include <string_view>
 
 #include "absl/log/check.h"
 #include "absl/log/log.h"
+#include "absl/strings/ascii.h"
 #include "absl/strings/str_format.h"
 #include "absl/strings/str_replace.h"
 
@@ -54,101 +54,95 @@ void JackFile::Advance() {
     token_ = nullptr;
   }
 
-  TokenType type;
-  std::string value;
-  for (char c; file_.get(c);) {
+  while (file_) {
     // Ignore preceding spaces in stream.
-    while (isspace(c)) {
-      if (!file_.get(c)) {
-        return;
-      }
+    while (absl::ascii_isspace(file_.peek())) {
+      file_.get();
+    }
+    if (file_.peek() == std::char_traits<char>::eof()) {
+      file_.get();
+      return;
     }
 
-    // Comment.
-    if (c == '/') {
-      if (file_.peek() == '/') {  // Single-line comment.
-        file_.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
-        continue;
-      }
-      if (file_.peek() == '*') {  // Multi-line comment.
-        file_.get();
-        while (file_.get(c)) {
-          if (c == '*' && file_.peek() == '/') {
-            file_.get();
-            break;
-          }
-        }
-        continue;
-      }
+    if (file_.peek() == '/' && ReadComment()) {
+      continue;
     }
 
-    // Integer constant.
-    if (isdigit(c)) {
-      value.push_back(c);
-      while (isdigit(file_.peek())) {
-        value.push_back(file_.get());
-      }
-      type = TokenType::kIntegerConstant;
-      break;
+    if (absl::ascii_isdigit(file_.peek())) {
+      ReadIntegerConstant();
+      return;
     }
-
-    // String constant.
-    if (c == '"') {
-      while (file_.get(c)) {
-        if (c == '"') {
-          break;
-        }
-        value.push_back(c);
-      }
-      if (!file_) {
-        LOG(ERROR) << "Unterminated string constant: ";
-      }
-      type = TokenType::kStringConstant;
-      break;
+    if (file_.peek() == '"') {
+      ReadStringConstant();
+      return;
     }
-
-    // Symbol.
-    if (IsSymbol(c)) {
-      value.push_back(c);
-      type = TokenType::kSymbol;
-      break;
+    if (Token::IsSymbol(file_.peek())) {
+      token_ = new Token(TokenType::kSymbol, std::string(1, file_.get()));
+      return;
     }
-
-    // Keyword or identifier.
-    if (isalpha(c) || c == '_') {
-      value.push_back(c);
-      while (isalnum(file_.peek()) || isdigit(file_.peek()) ||
-             file_.peek() == '_') {
-        value.push_back(file_.get());
-      }
-
-      if (IsKeyword(value)) {
-        type = TokenType::kKeyword;
-        break;
-      }
-      type = TokenType::kIdentifier;
-      break;
+    if (absl::ascii_isalpha(file_.peek()) || file_.peek() == '_') {
+      ReadKeywordOrIdentifier();
+      return;
     }
-
-    LOG(ERROR) << "Unkown token: '" << value << "'";
+    LOG(FATAL) << "Invalid character: " << static_cast<char>(file_.peek());
   }
-  token_ = new Token(type, value);
 }
 
-std::string JackFile::path() const { return path_; }
-Token* JackFile::token() { return token_; }
-
-bool JackFile::IsKeyword(std::string_view token) {
-  for (const std::string_view& keyword : kKeywords) {
-    if (token == keyword) {
-      return true;
+bool JackFile::ReadComment() {
+  CHECK(file_.get() == '/');
+  if (file_.peek() == '/') {  // Single-line comment.
+    file_.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+    return true;
+  } else if (file_.peek() == '*') {  // Multi-line comment.
+    file_.get();
+    char c;
+    while (file_.get(c)) {
+      if (c == '*' && file_.peek() == '/') {
+        file_.get();
+        break;
+      }
     }
+    QCHECK(file_) << "Unterminated multi-line comment";
+    return true;
   }
+  file_.unget();
   return false;
 }
 
-bool JackFile::IsSymbol(char c) {
-  return kSymbols.find(c) != std::string_view::npos;
+void JackFile::ReadIntegerConstant() {
+  std::string value;
+  while (absl::ascii_isdigit(file_.peek())) {
+    value.push_back(file_.get());
+  }
+  QCHECK(!value.empty());
+  token_ = new Token(TokenType::kIntegerConstant, std::move(value));
+}
+
+void JackFile::ReadStringConstant() {
+  CHECK(file_.get() == '"');
+  std::string value;
+  char c;
+  while (file_.get(c)) {
+    if (c == '"') {
+      break;
+    }
+    value.push_back(c);
+  }
+  QCHECK(file_) << "Unterminated string constant";
+  token_ = new Token(TokenType::kStringConstant, std::move(value));
+}
+
+void JackFile::ReadKeywordOrIdentifier() {
+  std::string value;
+  while (absl::ascii_isalnum(file_.peek()) || file_.peek() == '_') {
+    value.push_back(file_.get());
+  }
+  QCHECK(!value.empty());
+  if (Token::IsKeyword(value)) {
+    token_ = new Token(TokenType::kKeyword, std::move(value));
+  } else {
+    token_ = new Token(TokenType::kIdentifier, std::move(value));
+  }
 }
 
 }  // namespace nand2tetris
