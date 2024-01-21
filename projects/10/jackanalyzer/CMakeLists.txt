@@ -76,7 +76,24 @@ foreach(program ${test_programs})
     PROPERTIES
       FIXTURES_SETUP "jackanalyzer: ${identifier}"
   )
-  # TODO: Comparison tests
+
+  file(GLOB xml_files "${program}/expected/*.xml")
+  list(APPEND CMAKE_MESSAGE_INDENT "  ")
+  foreach(xml_file ${xml_files})
+    get_filename_component(xml_filename "${xml_file}" NAME)
+    message(DEBUG "Found expected XML file: ${xml_filename}")
+    add_test(
+      NAME "jackanalyzer: Compare ${identifier}/${xml_filename}"
+      COMMAND "${TextComparer}" "${xml_file}" "test_programs/${basename}/${xml_filename}"
+    )
+    set_tests_properties(
+      "jackanalyzer: Compare ${identifier}/${xml_filename}"
+      PROPERTIES
+        FIXTURES_REQUIRED "jackanalyzer: ${identifier}"
+        PASS_REGULAR_EXPRESSION "Comparison ended successfully"
+    )
+  endforeach()
+  list(POP_BACK CMAKE_MESSAGE_INDENT)
 endforeach()
 
 list(POP_BACK CMAKE_MESSAGE_INDENT)
