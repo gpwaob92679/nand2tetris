@@ -55,29 +55,26 @@ set(
 )
 
 foreach(program ${test_programs})
-  cmake_path(REMOVE_FILENAME program)
-  message(STATUS "Adding test Jack program: " ${program})
+  get_filename_component(program "${program}" ABSOLUTE)
+  file(RELATIVE_PATH identifier "${CMAKE_SOURCE_DIR}" "${program}")
+  message(STATUS "Adding test Jack program: ${identifier}")
 
-  cmake_path(GET program PARENT_PATH parent_path)
-  cmake_path(GET parent_path FILENAME basename)
+  get_filename_component(basename "${program}" NAME_WE)
   message(DEBUG "basename: " ${basename})
-
   file(
-    COPY ${program}
+    COPY "${program}/"
     DESTINATION "test_programs/${basename}/"
     PATTERN "*.vm" EXCLUDE
   )
 
   add_test(
-    NAME "jackanalyzer: Tokenize ${program}"
+    NAME "jackanalyzer: Tokenize ${identifier}"
     COMMAND jackanalyzer "test_programs/${basename}/"
   )
-  # TODO: Comparison tests
-
   set_tests_properties(
-    "jackanalyzer: Tokenize ${program}"
+    "jackanalyzer: Tokenize ${identifier}"
     PROPERTIES
-      FIXTURES_SETUP "jackanalyzer: ${program}"
+      FIXTURES_SETUP "jackanalyzer: ${identifier}"
   )
   # TODO: Comparison tests
 endforeach()

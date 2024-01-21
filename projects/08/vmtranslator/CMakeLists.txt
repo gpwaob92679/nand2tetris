@@ -105,7 +105,7 @@ gtest_discover_tests(
 # Test programs
 
 set(
-  test_programs
+  single_file_test_programs
   ../../07/StackArithmetic/SimpleAdd/
   ../../07/StackArithmetic/StackTest/
   ../../07/MemoryAccess/BasicTest/
@@ -117,87 +117,59 @@ set(
 )
 
 set(
-  full_test_programs
+  multi_file_test_programs
   ../FunctionCalls/NestedCall/
   ../FunctionCalls/FibonacciElement/
   ../FunctionCalls/StaticsTest/
 )
 
-foreach(program ${test_programs})
-  cmake_path(REMOVE_FILENAME program)
-  message(STATUS "Adding test VM program: " ${program})
+function(add_vm_test path is_multi_file)
+  # Note: `cmake_path()` crashes on Windows if any path contains CJK characters.
+  get_filename_component(path "${path}" ABSOLUTE)
+  file(RELATIVE_PATH identifier "${CMAKE_SOURCE_DIR}" "${path}")
+  message(STATUS "Adding VM test program: ${identifier}")
 
-  cmake_path(GET program PARENT_PATH parent_path)
-  cmake_path(GET parent_path FILENAME basename)
-  message(DEBUG "basename: " ${basename})
-
+  get_filename_component(basename "${path}" NAME_WE)
+  message(DEBUG "basename: ${basename}")
   file(
-    COPY ${program}
-    DESTINATION test_programs/${basename}/
+    COPY "${path}/"
+    DESTINATION "test_programs/${basename}/"
     PATTERN "*.asm" EXCLUDE
     PATTERN "*VME.tst" EXCLUDE
   )
 
+  if (is_multi_file)
+    set(source "test_programs/${basename}/")
+  else()
+    set(source "test_programs/${basename}/${basename}.vm")
+  endif()
   add_test(
-    NAME "vmtranslator: Translate ${program}"
-    COMMAND
-      vmtranslator test_programs/${basename}/${basename}.vm
-  )
-  add_test(
-    NAME
-      "vmtranslator: Compare ${program}"
-    COMMAND
-      ${CPUEmulator} test_programs/${basename}/${basename}.tst
-  )
-
-  set_tests_properties(
-    "vmtranslator: Translate ${program}"
-    PROPERTIES
-      FIXTURES_SETUP "vmtranslator: ${program}"
-  )
-  set_tests_properties(
-    "vmtranslator: Compare ${program}"
-    PROPERTIES
-      FIXTURES_REQUIRED "vmtranslator: ${program}"
-      PASS_REGULAR_EXPRESSION "End of script - Comparison ended successfully"
-  )
-endforeach()
-
-foreach(program ${full_test_programs})
-  cmake_path(REMOVE_FILENAME program)
-  message(STATUS "Adding test VM program: " ${program})
-
-  cmake_path(GET program PARENT_PATH parent_path)
-  cmake_path(GET parent_path FILENAME basename)
-  message(DEBUG "basename: " ${basename})
-
-  file(
-    COPY ${program}
-    DESTINATION test_programs/${basename}/
-    PATTERN "*.asm" EXCLUDE
-    PATTERN "*VME.tst" EXCLUDE
-  )
-
-  add_test(
-    NAME "vmtranslator: Translate ${program}"
-    COMMAND vmtranslator "test_programs/${basename}/"
+    NAME "vmtranslator: Translate ${identifier}"
+    COMMAND vmtranslator "${source}"
   )
   add_test(
-    NAME "vmtranslator: Compare ${program}"
+    NAME "vmtranslator: Compare ${identifier}"
     COMMAND "${CPUEmulator}" "test_programs/${basename}/${basename}.tst"
   )
 
   set_tests_properties(
-    "vmtranslator: Translate ${program}"
+    "vmtranslator: Translate ${identifier}"
     PROPERTIES
-      FIXTURES_SETUP "vmtranslator: ${program}"
+      FIXTURES_SETUP "vmtranslator: ${identifier}"
   )
   set_tests_properties(
-    "vmtranslator: Compare ${program}"
+    "vmtranslator: Compare ${identifier}"
     PROPERTIES
-      FIXTURES_REQUIRED "vmtranslator: ${program}"
+      FIXTURES_REQUIRED "vmtranslator: ${identifier}"
       PASS_REGULAR_EXPRESSION "End of script - Comparison ended successfully"
   )
+endfunction()
+
+foreach(program ${single_file_test_programs})
+  add_vm_test("${program}" FALSE)
+endforeach()
+foreach(program ${multi_file_test_programs})
+  add_vm_test("${program}" TRUE)
 endforeach()
 
 list(POP_BACK CMAKE_MESSAGE_INDENT)

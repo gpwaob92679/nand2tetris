@@ -29,31 +29,34 @@ set(
 )
 
 foreach(program ${test_programs})
-  message(STATUS "Adding test assembly program: " ${program})
+  get_filename_component(program "${program}" ABSOLUTE)
+  file(RELATIVE_PATH identifier "${CMAKE_SOURCE_DIR}" "${program}")
+  message(STATUS "Adding test assembly program: ${identifier}")
+
+  get_filename_component(basename "${program}" NAME_WE)
   file(
-    COPY ${program}
-    DESTINATION test_programs/
+    COPY "${program}"
+    DESTINATION "test_programs/"
   )
 
-  cmake_path(GET program STEM program_stem)
   add_test(
-    NAME "assembler: Assemble ${program}"
-    COMMAND assembler "test_programs/${program_stem}.asm"
+    NAME "assembler: Assemble ${identifier}"
+    COMMAND assembler "test_programs/${basename}.asm"
   )
   add_test(
-    NAME "assembler: Compare ${program}"
-    COMMAND "${TextComparer}" "test_programs/${program_stem}.hack" "${CMAKE_CURRENT_SOURCE_DIR}/../expected/${program_stem}.hack"
+    NAME "assembler: Compare ${identifier}"
+    COMMAND "${TextComparer}" "test_programs/${basename}.hack" "${CMAKE_CURRENT_SOURCE_DIR}/../expected/${basename}.hack"
   )
 
   set_tests_properties(
-    "assembler: Assemble ${program}"
+    "assembler: Assemble ${identifier}"
     PROPERTIES
-      FIXTURES_SETUP "assembler: ${program}"
+      FIXTURES_SETUP "assembler: ${identifier}"
   )
   set_tests_properties(
-    "assembler: Compare ${program}"
+    "assembler: Compare ${identifier}"
     PROPERTIES
-      FIXTURES_REQUIRED "assembler: ${program}"
+      FIXTURES_REQUIRED "assembler: ${identifier}"
       PASS_REGULAR_EXPRESSION "Comparison ended successfully"
   )
 endforeach()
