@@ -1,9 +1,10 @@
 #ifndef NAND2TETRIS_JACKANALYZER_TOKENIZER_H_
 #define NAND2TETRIS_JACKANALYZER_TOKENIZER_H_
 
-#include <fstream>
+#include <memory>
 #include <string>
 #include <string_view>
+#include <vector>
 
 namespace nand2tetris {
 
@@ -46,24 +47,7 @@ class Token {
   std::string value_;
 };
 
-class JackFile {
- public:
-  JackFile(std::string_view path);
-
-  void Advance();
-
-  Token* token() const { return token_; }
-
- private:
-  bool ReadComment();
-  void ReadIntegerConstant();
-  void ReadStringConstant();
-  void ReadKeywordOrIdentifier();
-
-  std::ifstream file_;
-  std::string path_;
-  Token* token_ = nullptr;
-};
+std::vector<std::unique_ptr<Token>> Tokenize(std::string_view jack_file_path);
 
 }  // namespace nand2tetris
 

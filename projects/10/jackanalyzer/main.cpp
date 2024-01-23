@@ -15,18 +15,16 @@ ABSL_FLAG(bool, v, false, "verbose output, print XML output to console");
 
 void Tokenize(std::filesystem::path jack_path) {
   LOG(INFO) << "Processing Jack file: " << jack_path.string();
-  nand2tetris::JackFile jack_file(jack_path.string());
   std::filesystem::path xml_path = jack_path;
   xml_path.replace_filename(
       absl::StrFormat("%sT.xml", jack_path.stem().string()));
   nand2tetris::TokensXmlFile xml_file(xml_path.string());
 
-  while (jack_file.token()) {
+  for (auto& token : nand2tetris::Tokenize(jack_path.string())) {
     if (absl::GetFlag(FLAGS_v)) {
-      LOG(INFO) << jack_file.token()->ToXmlElement();
+      LOG(INFO) << token->ToXmlElement();
     }
-    xml_file << *jack_file.token();
-    jack_file.Advance();
+    xml_file << *token;
   }
 }
 
