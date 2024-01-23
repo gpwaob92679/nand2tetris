@@ -17,7 +17,10 @@ TokensXmlFile::TokensXmlFile(std::string_view path)
   file_ << "<tokens>" << std::endl;
 }
 
-TokensXmlFile::~TokensXmlFile() { file_ << "</tokens>" << std::endl; }
+TokensXmlFile::~TokensXmlFile() {
+  file_ << "</tokens>" << std::endl;
+  file_.close();
+}
 
 TokensXmlFile& TokensXmlFile::operator<<(const Token& token) {
   file_ << "  " << token.ToXmlElement() << std::endl;
