@@ -10,6 +10,8 @@
 
 class Command {
  public:
+  virtual ~Command() = default;
+
   virtual std::string ToAssembly() const = 0;
 };
 std::ostream &operator<<(std::ostream &os, const Command &command);
