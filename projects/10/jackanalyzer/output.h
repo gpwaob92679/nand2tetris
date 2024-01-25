@@ -10,16 +10,14 @@ namespace nand2tetris {
 
 class TokensXmlFile {
  public:
-  TokensXmlFile(std::string_view path);
+  TokensXmlFile(std::string_view path, bool verbose);
   ~TokensXmlFile();
-
-  std::string path() const;
 
   TokensXmlFile& operator<<(const Token& x);
 
  private:
   std::ofstream file_;
-  std::string path_;
+  bool verbose_;
 };
 
 }  // namespace nand2tetris

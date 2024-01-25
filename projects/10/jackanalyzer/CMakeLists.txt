@@ -7,6 +7,7 @@ add_library(
 )
 target_link_libraries(
   jackanalyzer_tokenizer
+  absl::charset
   absl::check
   absl::log
   absl::str_format
@@ -21,6 +22,8 @@ target_link_libraries(
   jackanalyzer_output
   absl::check
   absl::log
+  absl::str_format
+  absl::strings
   jackanalyzer_tokenizer
 )
 

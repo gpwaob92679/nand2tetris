@@ -10,43 +10,28 @@
 #include "absl/log/check.h"
 #include "absl/log/log.h"
 #include "absl/strings/ascii.h"
+#include "absl/strings/charset.h"
 #include "absl/strings/str_format.h"
 #include "absl/strings/str_replace.h"
 
 namespace nand2tetris {
 
-Token::Token(TokenType type, std::string_view value)
-    : type_(type), value_(value) {}
+namespace {
 
-std::string Token::ToXmlElement() const {
-  std::string type_str;
-  switch (type_) {
-    case TokenType::kKeyword:
-      type_str = "keyword";
-      break;
-    case TokenType::kSymbol:
-      type_str = "symbol";
-      break;
-    case TokenType::kIdentifier:
-      type_str = "identifier";
-      break;
-    case TokenType::kIntegerConstant:
-      type_str = "integerConstant";
-      break;
-    case TokenType::kStringConstant:
-      type_str = "stringConstant";
-      break;
+constexpr std::string_view kKeywords[] = {
+    "class", "constructor", "function", "method", "field", "static", "var",
+    "int",   "char",        "boolean",  "void",   "true",  "false",  "null",
+    "this",  "let",         "do",       "if",     "else",  "while",  "return"};
+bool IsKeyword(std::string_view token) {
+  for (const std::string_view& keyword : kKeywords) {
+    if (token == keyword) {
+      return true;
+    }
   }
-  return absl::StrFormat("<%s> %s </%s>", type_str,
-                         absl::StrReplaceAll(value_, {{"<", "&lt;"},
-                                                      {">", "&gt;"},
-                                                      {"&", "&amp;"},
-                                                      {"\"", "&quot;"},
-                                                      {"'", "&apos;"}}),
-                         type_str);
+  return false;
 }
 
-namespace {
+constexpr absl::CharSet kSymbols("{}()[].,;+-*/&|<>=~");
 
 bool ReadComment(std::ifstream& file) {
   CHECK(file.get() == '/');
@@ -98,7 +83,7 @@ std::unique_ptr<Token> ReadKeywordOrIdentifier(std::ifstream& file) {
     value.push_back(file.get());
   }
   QCHECK(!value.empty());
-  if (Token::IsKeyword(value)) {
+  if (IsKeyword(value)) {
     return std::make_unique<Token>(TokenType::kKeyword, std::move(value));
   } else {
     return std::make_unique<Token>(TokenType::kIdentifier, std::move(value));
@@ -128,7 +113,7 @@ std::vector<std::unique_ptr<Token>> Tokenize(std::string_view jack_file_path) {
       tokens.push_back(ReadIntegerConstant(file));
     } else if (file.peek() == '"') {
       tokens.push_back(ReadStringConstant(file));
-    } else if (Token::IsSymbol(file.peek())) {
+    } else if (kSymbols.contains(file.peek())) {
       tokens.push_back(std::make_unique<Token>(TokenType::kSymbol,
                                                std::string(1, file.get())));
     } else if (absl::ascii_isalpha(file.peek()) || file.peek() == '_') {

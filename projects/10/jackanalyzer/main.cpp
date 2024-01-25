@@ -18,12 +18,10 @@ void Tokenize(std::filesystem::path jack_path) {
   std::filesystem::path xml_path = jack_path;
   xml_path.replace_filename(
       absl::StrFormat("%sT.xml", jack_path.stem().string()));
-  nand2tetris::TokensXmlFile xml_file(xml_path.string());
+  nand2tetris::TokensXmlFile xml_file(xml_path.string(),
+                                      absl::GetFlag(FLAGS_v));
 
   for (auto& token : nand2tetris::Tokenize(jack_path.string())) {
-    if (absl::GetFlag(FLAGS_v)) {
-      LOG(INFO) << token->ToXmlElement();
-    }
     xml_file << *token;
   }
 }
