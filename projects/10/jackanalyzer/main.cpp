@@ -22,7 +22,7 @@ void Tokenize(std::filesystem::path jack_path) {
                                       absl::GetFlag(FLAGS_v));
 
   for (auto& token : nand2tetris::Tokenize(jack_path.string())) {
-    xml_file << *token;
+    xml_file << token;
   }
 }
 

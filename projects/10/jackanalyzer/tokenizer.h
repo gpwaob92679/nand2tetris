@@ -1,7 +1,6 @@
 #ifndef NAND2TETRIS_JACKANALYZER_TOKENIZER_H_
 #define NAND2TETRIS_JACKANALYZER_TOKENIZER_H_
 
-#include <memory>
 #include <string>
 #include <string_view>
 #include <vector>
@@ -23,7 +22,7 @@ struct Token {
   Token(TokenType type, std::string_view value) : type(type), value(value) {}
 };
 
-std::vector<std::unique_ptr<Token>> Tokenize(std::string_view jack_file_path);
+std::vector<Token> Tokenize(std::string_view jack_file_path);
 
 }  // namespace nand2tetris
 

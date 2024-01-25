@@ -2,7 +2,6 @@
 
 #include <fstream>
 #include <limits>
-#include <memory>
 #include <string>
 #include <string_view>
 #include <vector>
@@ -54,16 +53,16 @@ bool ReadComment(std::ifstream& file) {
   return false;
 }
 
-std::unique_ptr<Token> ReadIntegerConstant(std::ifstream& file) {
+Token ReadIntegerConstant(std::ifstream& file) {
   std::string value;
   while (absl::ascii_isdigit(file.peek())) {
     value.push_back(file.get());
   }
   QCHECK(!value.empty());
-  return std::make_unique<Token>(TokenType::kIntegerConstant, std::move(value));
+  return Token(TokenType::kIntegerConstant, std::move(value));
 }
 
-std::unique_ptr<Token> ReadStringConstant(std::ifstream& file) {
+Token ReadStringConstant(std::ifstream& file) {
   CHECK(file.get() == '"');
   std::string value;
   char c;
@@ -74,28 +73,28 @@ std::unique_ptr<Token> ReadStringConstant(std::ifstream& file) {
     value.push_back(c);
   }
   QCHECK(file) << "Unterminated string constant";
-  return std::make_unique<Token>(TokenType::kStringConstant, std::move(value));
+  return Token(TokenType::kStringConstant, std::move(value));
 }
 
-std::unique_ptr<Token> ReadKeywordOrIdentifier(std::ifstream& file) {
+Token ReadKeywordOrIdentifier(std::ifstream& file) {
   std::string value;
   while (absl::ascii_isalnum(file.peek()) || file.peek() == '_') {
     value.push_back(file.get());
   }
   QCHECK(!value.empty());
   if (IsKeyword(value)) {
-    return std::make_unique<Token>(TokenType::kKeyword, std::move(value));
+    return Token(TokenType::kKeyword, std::move(value));
   } else {
-    return std::make_unique<Token>(TokenType::kIdentifier, std::move(value));
+    return Token(TokenType::kIdentifier, std::move(value));
   }
 }
 
 }  // namespace
 
-std::vector<std::unique_ptr<Token>> Tokenize(std::string_view jack_file_path) {
+std::vector<Token> Tokenize(std::string_view jack_file_path) {
   std::ifstream file(jack_file_path.data());
   QCHECK(file.is_open()) << "Failed to open file: " << jack_file_path;
-  std::vector<std::unique_ptr<Token>> tokens;
+  std::vector<Token> tokens;
   while (file) {
     // Ignore preceding spaces in stream.
     while (absl::ascii_isspace(file.peek())) {
@@ -114,8 +113,7 @@ std::vector<std::unique_ptr<Token>> Tokenize(std::string_view jack_file_path) {
     } else if (file.peek() == '"') {
       tokens.push_back(ReadStringConstant(file));
     } else if (kSymbols.contains(file.peek())) {
-      tokens.push_back(std::make_unique<Token>(TokenType::kSymbol,
-                                               std::string(1, file.get())));
+      tokens.emplace_back(TokenType::kSymbol, std::string(1, file.get()));
     } else if (absl::ascii_isalpha(file.peek()) || file.peek() == '_') {
       tokens.push_back(ReadKeywordOrIdentifier(file));
     } else {
