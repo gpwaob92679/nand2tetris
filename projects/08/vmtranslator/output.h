@@ -10,7 +10,7 @@ class AssemblyFile {
   ~AssemblyFile();
 
   template <class T>
-  AssemblyFile &operator<<(const T &value) {
+  AssemblyFile& operator<<(const T& value) {
     file_ << value;
     return *this;
   }

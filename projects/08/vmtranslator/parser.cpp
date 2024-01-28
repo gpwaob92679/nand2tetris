@@ -142,4 +142,4 @@ void VmFile::Advance() {
 std::string VmFile::path() { return path_; }
 std::string VmFile::line() { return line_; }
 size_t VmFile::line_number() { return line_number_; }
-Command *VmFile::command() { return command_; }
+Command* VmFile::command() { return command_; }

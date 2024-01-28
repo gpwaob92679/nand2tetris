@@ -16,7 +16,7 @@ ABSL_FLAG(bool, v, false, "verbose output, print assembly output to console");
 ABSL_FLAG(bool, d, false,
           "debug mode, write VM source lines as comments in assembly output");
 
-void Translate(VmFile &vm_file, AssemblyFile &asm_file) {
+void Translate(VmFile& vm_file, AssemblyFile& asm_file) {
   LOG(INFO) << "Processing VM file: " << vm_file.path();
   while (vm_file.command()) {
     if (absl::GetFlag(FLAGS_v)) {
@@ -31,10 +31,10 @@ void Translate(VmFile &vm_file, AssemblyFile &asm_file) {
   }
 }
 
-int main(int argc, char *argv[]) {
+int main(int argc, char* argv[]) {
   absl::SetProgramUsageMessage(
       absl::StrFormat("Usage: %s [-d] [-v] SOURCE", argv[0]));
-  std::vector<char *> positional_args = absl::ParseCommandLine(argc, argv);
+  std::vector<char*> positional_args = absl::ParseCommandLine(argc, argv);
   QCHECK_EQ(positional_args.size(), 2) << absl::ProgramUsageMessage();
 
   std::filesystem::directory_entry source(positional_args[1]);
@@ -63,7 +63,7 @@ int main(int argc, char *argv[]) {
   AssemblyFile asm_file(asm_path.string(), source.is_directory());
   if (source.is_directory()) {
     LOG(INFO) << "Multi-file source mode";
-    for (const std::filesystem::directory_entry &entry :
+    for (const std::filesystem::directory_entry& entry :
          std::filesystem::directory_iterator(source)) {
       if (entry.path().extension() == ".vm") {
         VmFile vm_file(entry.path().string());

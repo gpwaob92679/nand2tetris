@@ -16,7 +16,7 @@ class VmFile {
   std::string path();
   std::string line();
   size_t line_number();
-  Command *command();
+  Command* command();
 
  private:
   std::unique_ptr<Address> ParseAddress(std::string_view segment,
@@ -29,7 +29,7 @@ class VmFile {
   std::string line_;
   size_t line_number_ = 0;
   std::string function_;
-  Command *command_ = nullptr;
+  Command* command_ = nullptr;
 };
 
 #endif  // NAND2TETRIS_VMTRANSLATOR_PARSER_H_

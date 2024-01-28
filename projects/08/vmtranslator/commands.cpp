@@ -10,7 +10,7 @@
 
 #include "addressing.h"
 
-std::ostream &operator<<(std::ostream &os, const Command &command) {
+std::ostream& operator<<(std::ostream& os, const Command& command) {
   return os << command.ToAssembly();
 }
 
@@ -105,7 +105,7 @@ PopCommand::PopCommand(std::unique_ptr<Address> address)
     : address_(std::move(address)) {}
 
 std::string PopCommand::ToAssembly() const {
-  if (dynamic_cast<PointerAddressedAddress *>(address_.get())) {
+  if (dynamic_cast<PointerAddressedAddress*>(address_.get())) {
     return absl::StrFormat(
         "%s"
         "@R15\n"

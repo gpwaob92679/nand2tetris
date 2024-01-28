@@ -1,4 +1,5 @@
 BasedOnStyle: Google
+DerivePointerAlignment: false
 IncludeCategories:
   - Regex:           '^<ext/.*\.h>'
     Priority:        2

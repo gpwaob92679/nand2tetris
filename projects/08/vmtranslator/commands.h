@@ -12,7 +12,7 @@ class Command {
  public:
   virtual std::string ToAssembly() const = 0;
 };
-std::ostream &operator<<(std::ostream &os, const Command &command);
+std::ostream& operator<<(std::ostream& os, const Command& command);
 
 class BinaryArithmeticCommand : public Command {
  public:

@@ -60,7 +60,7 @@ class CInstruction : public Instruction {
       assembly.push_back('=');
     }
 
-    for (const auto &pair : kComputationCodes) {
+    for (const auto& pair : kComputationCodes) {
       if (pair.second == computation_) {
         absl::StrAppend(&assembly, pair.first);
         break;
@@ -75,7 +75,7 @@ class CInstruction : public Instruction {
   }
 
   bool SetComputation(std::string_view computation_str) {
-    for (const auto &pair : kComputationCodes) {
+    for (const auto& pair : kComputationCodes) {
       if (pair.first == computation_str) {
         computation_ = pair.second;
         return true;
@@ -143,7 +143,7 @@ bool IsNumber(std::string_view str) {
   return true;
 }
 
-int main(int argc, char *argv[]) {
+int main(int argc, char* argv[]) {
   QCHECK_GE(argc, 2) << "Usage: " << argv[0] << " SOURCE";
   std::ifstream asm_file(argv[1]);
   QCHECK(asm_file.is_open()) << "Failed to open input file '" << argv[1] << "'";
@@ -175,7 +175,7 @@ int main(int argc, char *argv[]) {
       {"R15", 15}, {"SCREEN", 16384}, {"KBD", 24576}, {"SP", 0},   {"LCL", 1},
       {"ARG", 2},  {"THIS", 3},       {"THAT", 4}};
   uint16_t instruction_counter = 0;
-  for (const std::string &line : trimmed_lines) {
+  for (const std::string& line : trimmed_lines) {
     if (line.front() == '(' && line.back() == ')') {  // Is label.
       symbol_table[line.substr(1, line.size() - 2)] = instruction_counter;
     } else {
@@ -191,7 +191,7 @@ int main(int argc, char *argv[]) {
   LOG(INFO) << "Output: " << hack_path.string();
 
   uint16_t variable_address = 16;
-  for (const std::string &line : trimmed_lines) {
+  for (const std::string& line : trimmed_lines) {
     if (line.front() == '(' && line.back() == ')') {  // Label
       continue;
     }
