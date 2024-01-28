@@ -74,31 +74,31 @@ install(
 # Unit tests
 
 add_executable(
-  addressing_test
+  vmtranslator_addressing_test
   addressing_test.cpp
 )
 target_link_libraries(
-  addressing_test
+  vmtranslator_addressing_test
   vmtranslator_addressing
   absl::str_format
   GTest::gtest_main
 )
 gtest_discover_tests(
-  addressing_test
+  vmtranslator_addressing_test
   TEST_PREFIX "vmtranslator::"
 )
 
 add_executable(
-  commands_test
+  vmtranslator_commands_test
   commands_test.cpp
 )
 target_link_libraries(
-  commands_test
+  vmtranslator_commands_test
   vmtranslator_commands
   GTest::gtest_main
 )
 gtest_discover_tests(
-  commands_test
+  vmtranslator_commands_test
   TEST_PREFIX "vmtranslator::"
 )
 
