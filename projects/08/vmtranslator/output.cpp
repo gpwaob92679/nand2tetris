@@ -7,6 +7,8 @@
 
 #include "commands.h"
 
+namespace nand2tetris {
+
 AssemblyFile::AssemblyFile(std::string_view path, bool source_is_multi_file)
     : file_(path.data()), source_is_multi_file_(source_is_multi_file) {
   QCHECK(file_.is_open()) << "Could not open output file: " << path;
@@ -36,3 +38,5 @@ AssemblyFile::~AssemblyFile() {
   }
   file_.close();
 }
+
+}  // namespace nand2tetris

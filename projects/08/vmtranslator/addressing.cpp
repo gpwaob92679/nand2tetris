@@ -7,6 +7,8 @@
 #include "absl/log/log.h"
 #include "absl/strings/str_format.h"
 
+namespace nand2tetris {
+
 std::string DestinationString(uint16_t destination) {
   std::string result;
   if (destination & Destination::kA) {
@@ -92,3 +94,5 @@ TempAddress::TempAddress(uint16_t index)
                  << " (temp segment is 8 words long)";
   }
 }
+
+}  // namespace nand2tetris

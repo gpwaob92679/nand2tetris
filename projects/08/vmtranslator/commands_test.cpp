@@ -6,6 +6,9 @@
 
 #include "addressing.h"
 
+namespace nand2tetris {
+namespace {
+
 TEST(ArithmeticsCommandTest, AddCommand) {
   EXPECT_EQ(AddCommand().ToAssembly(),
             "@SP\n"
@@ -502,3 +505,6 @@ TEST(ReturnCommandTest, ReturnCommand) {
             "A=M\n"
             "0;JMP\n");
 }
+
+}  // namespace
+}  // namespace nand2tetris

@@ -5,6 +5,8 @@
 #include <string>
 #include <string_view>
 
+namespace nand2tetris {
+
 enum Destination {
   kA = 4,
   kD = 2,
@@ -91,5 +93,7 @@ class TempAddress : public DirectlyAddressedAddress {
  public:
   TempAddress(uint16_t index);
 };
+
+}  // namespace nand2tetris
 
 #endif  // NAND2TETRIS_VMTRANSLATOR_ADDRESSING_H_

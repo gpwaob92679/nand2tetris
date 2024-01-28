@@ -6,6 +6,8 @@
 
 #include "commands.h"
 
+namespace nand2tetris {
+
 class VmFile {
  public:
   VmFile(std::string_view path);
@@ -31,5 +33,7 @@ class VmFile {
   std::string function_;
   Command* command_ = nullptr;
 };
+
+}  // namespace nand2tetris
 
 #endif  // NAND2TETRIS_VMTRANSLATOR_PARSER_H_

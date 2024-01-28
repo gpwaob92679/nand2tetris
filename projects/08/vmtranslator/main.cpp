@@ -16,7 +16,8 @@ ABSL_FLAG(bool, v, false, "verbose output, print assembly output to console");
 ABSL_FLAG(bool, d, false,
           "debug mode, write VM source lines as comments in assembly output");
 
-void Translate(VmFile& vm_file, AssemblyFile& asm_file) {
+void Translate(nand2tetris::VmFile& vm_file,
+               nand2tetris::AssemblyFile& asm_file) {
   LOG(INFO) << "Processing VM file: " << vm_file.path();
   while (vm_file.command()) {
     if (absl::GetFlag(FLAGS_v)) {
@@ -60,19 +61,19 @@ int main(int argc, char* argv[]) {
   LOG(INFO) << "Program: " << program_name;
 
   // Translate.
-  AssemblyFile asm_file(asm_path.string(), source.is_directory());
+  nand2tetris::AssemblyFile asm_file(asm_path.string(), source.is_directory());
   if (source.is_directory()) {
     LOG(INFO) << "Multi-file source mode";
     for (const std::filesystem::directory_entry& entry :
          std::filesystem::directory_iterator(source)) {
       if (entry.path().extension() == ".vm") {
-        VmFile vm_file(entry.path().string());
+        nand2tetris::VmFile vm_file(entry.path().string());
         Translate(vm_file, asm_file);
       }
     }
   } else {
     LOG(INFO) << "Single-file source mode";
-    VmFile vm_file(positional_args[1]);
+    nand2tetris::VmFile vm_file(positional_args[1]);
     Translate(vm_file, asm_file);
   }
   return 0;

@@ -16,6 +16,8 @@
 #include "addressing.h"
 #include "commands.h"
 
+namespace nand2tetris {
+
 VmFile::VmFile(std::string_view path)
     : file_(path.data()),
       path_(path),
@@ -143,3 +145,5 @@ std::string VmFile::path() { return path_; }
 std::string VmFile::line() { return line_; }
 size_t VmFile::line_number() { return line_number_; }
 Command* VmFile::command() { return command_; }
+
+}  // namespace nand2tetris

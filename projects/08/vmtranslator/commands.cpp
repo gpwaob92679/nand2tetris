@@ -10,6 +10,8 @@
 
 #include "addressing.h"
 
+namespace nand2tetris {
+
 std::ostream& operator<<(std::ostream& os, const Command& command) {
   return os << command.ToAssembly();
 }
@@ -273,3 +275,5 @@ std::string ReturnCommand::ToAssembly() const {
          "A=M\n"
          "0;JMP\n";
 }
+
+}  // namespace nand2tetris

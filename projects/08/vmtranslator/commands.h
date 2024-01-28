@@ -8,6 +8,8 @@
 
 #include "addressing.h"
 
+namespace nand2tetris {
+
 class Command {
  public:
   virtual std::string ToAssembly() const = 0;
@@ -161,5 +163,7 @@ class ReturnCommand : public Command {
  public:
   std::string ToAssembly() const override;
 };
+
+}  // namespace nand2tetris
 
 #endif  // NAND2TETRIS_VMTRANSLATOR_COMMANDS_H_

@@ -3,6 +3,9 @@
 #include "absl/strings/str_format.h"
 #include "gtest/gtest.h"
 
+namespace nand2tetris {
+namespace {
+
 TEST(DestinationTest, DestinationString) {
   EXPECT_EQ(DestinationString(Destination::kA), "A");
   EXPECT_EQ(DestinationString(Destination::kD), "D");
@@ -98,3 +101,6 @@ TEST(AddressingTest, TempAddress) {
     EXPECT_EQ(address.value_register(), 'M');
   }
 }
+
+}  // namespace
+}  // namespace nand2tetris

@@ -4,6 +4,8 @@
 #include <fstream>
 #include <string_view>
 
+namespace nand2tetris {
+
 class AssemblyFile {
  public:
   AssemblyFile(std::string_view path, bool source_is_multi_file);
@@ -19,5 +21,7 @@ class AssemblyFile {
   std::ofstream file_;
   bool source_is_multi_file_ = false;
 };
+
+}  // namespace nand2tetris
 
 #endif  // NAND2TETRIS_VMTRANSLATOR_OUTPUT_H_
