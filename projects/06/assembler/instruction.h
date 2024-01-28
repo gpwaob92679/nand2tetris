@@ -11,6 +11,8 @@ namespace nand2tetris {
 
 class Instruction {
  public:
+  virtual ~Instruction() = default;
+
   virtual std::string ToMachine() const = 0;
   virtual std::string ToAssembly() const = 0;
 };
@@ -36,6 +38,7 @@ class CInstruction : public Instruction {
   bool SetJump(std::string_view jump_str);
 
  private:
+  // Map of computation codes in assembly mnemonics to binary machine codes.
   static constexpr std::pair<std::string_view, std::bitset<7>>
       kComputationCodes[] = {
           {"0", 0b0101010},   {"1", 0b0111111},   {"-1", 0b0111010},
@@ -48,6 +51,8 @@ class CInstruction : public Instruction {
           {"M+1", 0b1110111}, {"M-1", 0b1110010}, {"D+M", 0b1000010},
           {"D-M", 0b1010011}, {"M-D", 0b1000111}, {"D&M", 0b1000000},
           {"D|M", 0b1010101}};
+  // The index of each mnemonic in this array corresponds to its binary machine
+  // code.
   static constexpr std::string_view kJumpCodes[8] = {
       "", "JGT", "JEQ", "JGE", "JLT", "JNE", "JLE", "JMP"};
 

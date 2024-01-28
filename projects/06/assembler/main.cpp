@@ -10,7 +10,7 @@
 
 #include "instruction.h"
 
-bool IsNumber(std::string_view str) {
+inline bool IsNumber(std::string_view str) {
   for (char c : str) {
     if (!isdigit(c)) {
       return false;
@@ -19,12 +19,17 @@ bool IsNumber(std::string_view str) {
   return true;
 }
 
+inline bool IsLabel(std::string_view str) {
+  return str.front() == '(' && str.back() == ')';
+}
+
 int main(int argc, char* argv[]) {
   QCHECK_GE(argc, 2) << "Usage: " << argv[0] << " SOURCE";
   std::ifstream asm_file(argv[1]);
-  QCHECK(asm_file.is_open()) << "Failed to open input file '" << argv[1] << "'";
+  QCHECK(asm_file.is_open()) << "Failed to open input file " << argv[1];
   LOG(INFO) << "Source: " << argv[1];
 
+  // Trim comments and whitespaces.
   std::string buffer;
   std::vector<std::string> trimmed_lines;
   while (std::getline(asm_file, buffer)) {
@@ -44,6 +49,7 @@ int main(int argc, char* argv[]) {
   }
   asm_file.close();
 
+  // First pass: map labels to instruction addresses.
   std::unordered_map<std::string, uint16_t> symbol_table = {
       {"R0", 0},   {"R1", 1},         {"R2", 2},      {"R3", 3},   {"R4", 4},
       {"R5", 5},   {"R6", 6},         {"R7", 7},      {"R8", 8},   {"R9", 9},
@@ -52,7 +58,7 @@ int main(int argc, char* argv[]) {
       {"ARG", 2},  {"THIS", 3},       {"THAT", 4}};
   uint16_t instruction_counter = 0;
   for (const std::string& line : trimmed_lines) {
-    if (line.front() == '(' && line.back() == ')') {  // Is label.
+    if (IsLabel(line)) {  // Is label.
       symbol_table[line.substr(1, line.size() - 2)] = instruction_counter;
     } else {
       ++instruction_counter;
@@ -62,13 +68,14 @@ int main(int argc, char* argv[]) {
   std::filesystem::path hack_path(argv[1]);
   hack_path.replace_extension(".hack");
   std::ofstream hack_file(hack_path);
-  CHECK(hack_file.is_open())
+  QCHECK(hack_file.is_open())
       << "Failed to open output file " << hack_path.string();
   LOG(INFO) << "Output: " << hack_path.string();
 
+  // Second pass: translate instructions.
   uint16_t variable_address = 16;
   for (const std::string& line : trimmed_lines) {
-    if (line.front() == '(' && line.back() == ')') {  // Label
+    if (IsLabel(line)) {
       continue;
     }
     if (line.front() == '@') {  // A-instruction
@@ -83,7 +90,7 @@ int main(int argc, char* argv[]) {
           LOG(ERROR) << "Cannot convert " << value_str << " to uint16_t";
         }
       } else {
-        if (!symbol_table.count(value_str)) {
+        if (!symbol_table.count(value_str)) {  // New variable.
           symbol_table[value_str] = variable_address++;
         }
         hack_file

@@ -1,6 +1,8 @@
 #include "instruction.h"
 
 #include <cstdint>
+#include <string>
+#include <string_view>
 
 #include "absl/log/log.h"
 #include "absl/strings/str_cat.h"
