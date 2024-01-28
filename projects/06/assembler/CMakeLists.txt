@@ -1,12 +1,24 @@
 message(STATUS "Configuring project 6: Assembler")
 list(APPEND CMAKE_MESSAGE_INDENT "  ")
 
+add_library(
+  assembler_instruction
+  instruction.cpp
+)
+target_link_libraries(
+  assembler_instruction
+  absl::log
+  absl::strings
+  absl::str_format
+)
+
 add_executable(
   assembler
   main.cpp
 )
 target_link_libraries(
   assembler
+  assembler_instruction
   absl::check
   absl::log
   absl::strings
@@ -16,6 +28,8 @@ install(
   TARGETS assembler
   DESTINATION ${CMAKE_SOURCE_DIR}/projects/bin
 )
+
+# Test programs
 
 set(
   test_programs
