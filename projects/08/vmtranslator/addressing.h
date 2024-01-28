@@ -18,6 +18,7 @@ std::string DestinationString(uint16_t destination);
 class Address {
  public:
   Address(char value_register);
+  virtual ~Address() = default;
 
   // Assembly code that stores the address of the value to be accessed in
   // registers specified by `destination`.
