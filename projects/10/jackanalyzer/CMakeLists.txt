@@ -15,6 +15,18 @@ target_link_libraries(
 )
 
 add_library(
+  jackanalyzer_parser
+  parser.cpp
+)
+target_link_libraries(
+  jackanalyzer_parser
+  absl::charset
+  absl::check
+  absl::log
+  jackanalyzer_tokenizer
+)
+
+add_library(
   jackanalyzer_output
   output.cpp
 )
