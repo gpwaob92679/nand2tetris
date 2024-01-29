@@ -1,6 +1,7 @@
 #ifndef NAND2TETRIS_JACKANALYZER_TOKENIZER_H_
 #define NAND2TETRIS_JACKANALYZER_TOKENIZER_H_
 
+#include <iostream>
 #include <string>
 #include <string_view>
 #include <vector>
@@ -14,6 +15,8 @@ enum class TokenType {
   kIntegerConstant,
   kStringConstant,
 };
+
+std::ostream& operator<<(std::ostream& os, TokenType type);
 
 struct Token {
   TokenType type;

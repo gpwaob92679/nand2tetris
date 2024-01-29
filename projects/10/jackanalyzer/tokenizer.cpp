@@ -1,6 +1,7 @@
 #include "tokenizer.h"
 
 #include <fstream>
+#include <iostream>
 #include <limits>
 #include <string>
 #include <string_view>
@@ -90,6 +91,22 @@ Token ReadKeywordOrIdentifier(std::ifstream& file) {
 }
 
 }  // namespace
+
+std::ostream& operator<<(std::ostream& os, TokenType type) {
+  switch (type) {
+    case TokenType::kKeyword:
+      return os << "keyword";
+    case TokenType::kSymbol:
+      return os << "symbol";
+    case TokenType::kIdentifier:
+      return os << "identifier";
+    case TokenType::kIntegerConstant:
+      return os << "integerConstant";
+    case TokenType::kStringConstant:
+      return os << "stringConstant";
+  }
+  return os << "unknown";
+}
 
 std::vector<Token> Tokenize(std::string_view jack_file_path) {
   std::ifstream file(jack_file_path.data());

@@ -32,26 +32,9 @@ XmlFile::XmlFile(std::string_view path, bool verbose)
 XmlFile::~XmlFile() { file_.close(); }
 
 XmlFile& XmlFile::operator<<(const Token& token) {
-  std::string type_str;
-  switch (token.type) {
-    case TokenType::kKeyword:
-      type_str = "keyword";
-      break;
-    case TokenType::kSymbol:
-      type_str = "symbol";
-      break;
-    case TokenType::kIdentifier:
-      type_str = "identifier";
-      break;
-    case TokenType::kIntegerConstant:
-      type_str = "integerConstant";
-      break;
-    case TokenType::kStringConstant:
-      type_str = "stringConstant";
-      break;
-  }
   std::string xml_element =
-      absl::StrFormat("<%s> %s </%s>", type_str, Escape(token.value), type_str);
+      absl::StrFormat("<%s> %s </%s>", absl::FormatStreamed(token.type),
+                      Escape(token.value), absl::FormatStreamed(token.type));
   if (verbose_) {
     LOG(INFO) << xml_element;
   }
