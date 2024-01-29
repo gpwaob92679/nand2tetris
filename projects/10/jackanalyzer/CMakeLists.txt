@@ -36,6 +36,7 @@ target_link_libraries(
   absl::log
   absl::str_format
   absl::strings
+  jackanalyzer_parser
   jackanalyzer_tokenizer
 )
 
@@ -51,8 +52,9 @@ target_link_libraries(
   absl::flags_usage
   absl::log
   absl::str_format
-  jackanalyzer_tokenizer
   jackanalyzer_output
+  jackanalyzer_parser
+  jackanalyzer_tokenizer
 )
 
 install(

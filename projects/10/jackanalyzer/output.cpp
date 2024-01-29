@@ -1,12 +1,14 @@
 #include "output.h"
 
 #include <string_view>
+#include <variant>
 
 #include "absl/log/check.h"
 #include "absl/log/log.h"
 #include "absl/strings/str_format.h"
 #include "absl/strings/str_replace.h"
 
+#include "parser.h"
 #include "tokenizer.h"
 
 namespace nand2tetris {
@@ -21,20 +23,15 @@ inline std::string Escape(std::string_view str) {
 }
 }  // namespace
 
-TokensXmlFile::TokensXmlFile(std::string_view path, bool verbose)
+XmlFile::XmlFile(std::string_view path, bool verbose)
     : file_(path.data()), verbose_(verbose) {
   QCHECK(file_.is_open()) << "Could not open output file: " << path;
   LOG(INFO) << "Output: " << path;
-
-  file_ << "<tokens>" << std::endl;
 }
 
-TokensXmlFile::~TokensXmlFile() {
-  file_ << "</tokens>" << std::endl;
-  file_.close();
-}
+XmlFile::~XmlFile() { file_.close(); }
 
-TokensXmlFile& TokensXmlFile::operator<<(const Token& token) {
+XmlFile& XmlFile::operator<<(const Token& token) {
   std::string type_str;
   switch (token.type) {
     case TokenType::kKeyword:
@@ -58,7 +55,38 @@ TokensXmlFile& TokensXmlFile::operator<<(const Token& token) {
   if (verbose_) {
     LOG(INFO) << xml_element;
   }
-  file_ << "  " << xml_element << std::endl;
+  WriteIndentation();
+  file_ << xml_element << std::endl;
+  return *this;
+}
+
+void XmlFile::operator<<(const std::vector<Token>& tokens) {
+  WriteIndentation();
+  file_ << "<tokens>" << std::endl;
+
+  Indent();
+  for (const Token& token : tokens) {
+    *this << token;
+  }
+  Unindent();
+
+  WriteIndentation();
+  file_ << "</tokens>" << std::endl;
+}
+
+XmlFile& XmlFile::operator<<(const Node& node) {
+  WriteIndentation();
+  file_ << '<' << node.type << '>' << std::endl;
+
+  // Recursively write children to file.
+  Indent();
+  for (const std::variant<Node, Token>& child : node.children) {
+    std::visit([this](auto&& arg) { *this << arg; }, child);
+  }
+  Unindent();
+
+  WriteIndentation();
+  file_ << "</" << node.type << '>' << std::endl;
   return *this;
 }
 

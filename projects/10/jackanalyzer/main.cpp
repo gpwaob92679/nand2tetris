@@ -9,21 +9,29 @@
 #include "absl/strings/str_format.h"
 
 #include "output.h"
+#include "parser.h"
 #include "tokenizer.h"
 
 ABSL_FLAG(bool, v, false, "verbose output, print XML output to console");
 
-void Tokenize(std::filesystem::path jack_path) {
+void Process(std::filesystem::path jack_path) {
   LOG(INFO) << "Processing Jack file: " << jack_path.string();
   std::filesystem::path xml_path = jack_path;
   xml_path.replace_filename(
       absl::StrFormat("%sT.xml", jack_path.stem().string()));
-  nand2tetris::TokensXmlFile xml_file(xml_path.string(),
-                                      absl::GetFlag(FLAGS_v));
+  nand2tetris::XmlFile tokens_xml_file(xml_path.string(),
+                                       absl::GetFlag(FLAGS_v));
 
-  for (auto& token : nand2tetris::Tokenize(jack_path.string())) {
-    xml_file << token;
-  }
+  std::vector<nand2tetris::Token> tokens =
+      nand2tetris::Tokenize(jack_path.string());
+  tokens_xml_file << tokens;
+
+  xml_path.replace_filename(
+      absl::StrFormat("%s.xml", jack_path.stem().string()));
+  nand2tetris::XmlFile class_xml_file(xml_path.string(),
+                                      absl::GetFlag(FLAGS_v));
+  nand2tetris::Node root = nand2tetris::Parse(tokens);
+  class_xml_file << root;
 }
 
 int main(int argc, char* argv[]) {
@@ -37,11 +45,11 @@ int main(int argc, char* argv[]) {
     for (const std::filesystem::directory_entry& entry :
          std::filesystem::directory_iterator(source)) {
       if (entry.path().extension() == ".jack") {
-        Tokenize(entry.path());
+        Process(entry.path());
       }
     }
   } else {
-    Tokenize(source.path());
+    Process(source.path());
   }
   return 0;
 }
