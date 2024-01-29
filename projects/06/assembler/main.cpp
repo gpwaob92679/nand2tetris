@@ -5,6 +5,8 @@
 #include <vector>
 
 #include "absl/log/check.h"
+#include "absl/log/globals.h"
+#include "absl/log/initialize.h"
 #include "absl/log/log.h"
 #include "absl/strings/numbers.h"
 
@@ -24,6 +26,9 @@ inline bool IsLabel(std::string_view str) {
 }
 
 int main(int argc, char* argv[]) {
+  absl::InitializeLog();
+  absl::SetStderrThreshold(absl::LogSeverity::kInfo);
+
   QCHECK_GE(argc, 2) << "Usage: " << argv[0] << " SOURCE";
   std::ifstream asm_file(argv[1]);
   QCHECK(asm_file.is_open()) << "Failed to open input file " << argv[1];

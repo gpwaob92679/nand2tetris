@@ -51,6 +51,8 @@ target_link_libraries(
   absl::flags_parse
   absl::flags_usage
   absl::log
+  absl::log_globals
+  absl::log_initialize
   absl::str_format
   jackanalyzer_output
   jackanalyzer_parser

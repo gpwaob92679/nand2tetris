@@ -21,6 +21,8 @@ target_link_libraries(
   assembler_instruction
   absl::check
   absl::log
+  absl::log_globals
+  absl::log_initialize
   absl::strings
 )
 

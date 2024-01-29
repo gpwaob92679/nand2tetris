@@ -5,6 +5,8 @@
 #include "absl/flags/parse.h"
 #include "absl/flags/usage.h"
 #include "absl/log/check.h"
+#include "absl/log/globals.h"
+#include "absl/log/initialize.h"
 #include "absl/log/log.h"
 #include "absl/strings/str_cat.h"
 #include "absl/strings/str_format.h"
@@ -33,6 +35,9 @@ void Translate(nand2tetris::VmFile& vm_file,
 }
 
 int main(int argc, char* argv[]) {
+  absl::InitializeLog();
+  absl::SetStderrThreshold(absl::LogSeverity::kInfo);
+
   absl::SetProgramUsageMessage(
       absl::StrFormat("Usage: %s [-d] [-v] SOURCE", argv[0]));
   std::vector<char*> positional_args = absl::ParseCommandLine(argc, argv);
